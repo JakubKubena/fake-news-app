@@ -1,4 +1,6 @@
-package sk.kubena.fakenews.model;
+package sk.kubena.fakenews.ajax;
+
+import sk.kubena.fakenews.article.Article;
 
 public class AjaxResponseBody {
     String message;

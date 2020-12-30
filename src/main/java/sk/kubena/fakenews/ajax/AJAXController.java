@@ -1,16 +1,13 @@
-package sk.kubena.fakenews.controller;
+package sk.kubena.fakenews.ajax;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.Errors;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import sk.kubena.fakenews.model.AjaxResponseBody;
-import sk.kubena.fakenews.model.Article;
-import sk.kubena.fakenews.service.ArticleService;
-
-import java.util.stream.Collectors;
+import sk.kubena.fakenews.article.Article;
+import sk.kubena.fakenews.article.ArticleService;
 
 @Controller
 public class AJAXController {
@@ -26,6 +23,12 @@ public class AJAXController {
         System.out.println(article.toString());
 
         return new ResponseEntity<>("Hello World!", HttpStatus.OK);
+    }
+
+    @RequestMapping("/home")
+    public String home(Model model) {
+        model.addAttribute("articles", articleService.getAllArticles());
+        return "views/home";
     }
 
 //    @PostMapping("/api")

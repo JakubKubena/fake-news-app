@@ -1,16 +1,27 @@
-package sk.kubena.fakenews.model;
+package sk.kubena.fakenews.article;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
+@Table(name = "article")
 public class Article {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
     private int id;
+
+    @Column(name = "url")
     private String url;
+
+    @Column(name = "title")
     private String title;
+
+    @Column(name = "rating")
     private String rating;
+
+    @Lob
+    @Column(name = "content")
     private String content;
 
     public Article() {
@@ -65,11 +76,9 @@ public class Article {
 
     @Override
     public String toString() {
-        return "Article{" + '\n' +
-                "url= " + url + '\n' +
+        return "url= " + url + '\n' +
                 "title= " + title + '\n' +
                 "rating= " + rating + '\n' +
-                "content= " + '\n' + content + '\n' +
-                '}';
+                "content= " + content.substring(0,100) + '\n' + '\n';
     }
 }

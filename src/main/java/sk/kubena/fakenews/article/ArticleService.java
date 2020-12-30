@@ -1,9 +1,9 @@
-package sk.kubena.fakenews.service;
+package sk.kubena.fakenews.article;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sk.kubena.fakenews.model.Article;
-import sk.kubena.fakenews.repository.ArticleRepository;
+import sk.kubena.fakenews.article.Article;
+import sk.kubena.fakenews.article.ArticleRepository;
 
 import java.util.ArrayList;
 import java.util.List;
