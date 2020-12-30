@@ -1,19 +1,34 @@
 package sk.kubena.fakenews.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
 public class Article {
+
+    @Id
+    private int id;
     private String url;
     private String title;
-    private String content;
     private String rating;
+    private String content;
 
     public Article() {
     }
 
-    public Article(String url, String title, String content, String rating) {
+    public Article(String url, String title, String rating, String content) {
         this.url = url;
         this.title = title;
-        this.content = content;
         this.rating = rating;
+        this.content = content;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getUrl() {
@@ -32,20 +47,20 @@ public class Article {
         this.title = title;
     }
 
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
     public String getRating() {
         return rating;
     }
 
     public void setRating(String rating) {
         this.rating = rating;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     @Override
