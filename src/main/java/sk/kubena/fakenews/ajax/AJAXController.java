@@ -17,9 +17,7 @@ public class AJAXController {
 
     @PostMapping("/api")
     public ResponseEntity<?> postController(@RequestBody Article article) {
-
         articleService.addArticle(article);
-
         System.out.println(article.toString());
 
         return new ResponseEntity<>("Hello World!", HttpStatus.OK);
@@ -28,6 +26,7 @@ public class AJAXController {
     @RequestMapping("/home")
     public String home(Model model) {
         model.addAttribute("articles", articleService.getAllArticles());
+
         return "views/home";
     }
 
