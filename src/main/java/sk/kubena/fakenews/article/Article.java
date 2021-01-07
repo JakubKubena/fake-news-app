@@ -1,6 +1,13 @@
 package sk.kubena.fakenews.article;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import sk.kubena.fakenews.rating.Rating;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import javax.persistence.*;
+import java.sql.Timestamp;
 
 @Entity
 @Table(name = "article")
@@ -17,21 +24,35 @@ public class Article {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "rating")
+    @Transient
     private String rating;
 
     @Lob
     @Column(name = "content")
     private String content;
 
+    @OneToOne(mappedBy = "articleId")
+    @JsonIgnoreProperties("articleId")
+    private Rating ratingId;
+
+    @CreationTimestamp
+    @Column(name = "created_at")
+    private Timestamp createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Timestamp updatedAt;
+
     public Article() {
     }
 
-    public Article(String url, String title, String rating, String content) {
+    public Article(String url, String title, String rating, String content, Timestamp createdAt, Timestamp updatedAt) {
         this.url = url;
         this.title = title;
         this.rating = rating;
         this.content = content;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public int getId() {
@@ -74,11 +95,37 @@ public class Article {
         this.content = content;
     }
 
+    public Rating getRatingId() {
+        return ratingId;
+    }
+
+    public void setRatingId(Rating ratingId) {
+        this.ratingId = ratingId;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
     @Override
     public String toString() {
         return "url= " + url + '\n' +
                 "title= " + title + '\n' +
                 "rating= " + rating + '\n' +
-                "content= " + content.substring(0,100) + '\n' + '\n';
+//                "content= " + content + '\n' +
+                "createdAt= " + createdAt + '\n' +
+                "updatedAt= " + updatedAt + '\n';
     }
 }

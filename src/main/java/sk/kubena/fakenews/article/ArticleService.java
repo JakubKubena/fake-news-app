@@ -2,8 +2,7 @@ package sk.kubena.fakenews.article;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sk.kubena.fakenews.article.Article;
-import sk.kubena.fakenews.article.ArticleRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,22 +10,19 @@ import java.util.List;
 @Service
 public class ArticleService {
 
-    @Autowired
-    private ArticleRepository articleRepository;
+    private final ArticleRepository articleRepository;
 
-//    private final ArticleRepository articleRepository;
-//
-//    @Autowired
-//    public ArticleService(ArticleRepository articleRepository) {
-//        this.articleRepository = articleRepository;
-//    }
+    @Autowired
+    public ArticleService(ArticleRepository articleRepository) {
+        this.articleRepository = articleRepository;
+    }
 
     public List<Article> getAllArticles() {
         return new ArrayList<>(articleRepository.findAll());
     }
 
     public Article getArticle(int id) {
-        return articleRepository.findById(id).get();  // .findOne(id); --> .findById(id).get();
+        return articleRepository.findById(id).orElse(null);
     }
 
     public void addArticle(Article article) {
@@ -38,6 +34,11 @@ public class ArticleService {
     }
 
     public void deleteArticle(int id) {
-        articleRepository.deleteById(id);  // .delete(id); --> .deleteById(id);
+        articleRepository.deleteById(id);
+    }
+
+    @Transactional
+    public Article checkIfArticleAlreadyExists(Article article) {
+        return articleRepository.findArticleByUrl(article.getUrl());
     }
 }

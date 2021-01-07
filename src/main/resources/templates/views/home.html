@@ -13,10 +13,16 @@
 <!--    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>-->
 <!--    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>-->
 <!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>-->
+<!--    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>-->
     <style>
         table, th, td {
             border: 1px solid black;
             border-collapse: collapse;
+        }
+
+        table {
+            width: 100%;
         }
     </style>
 </head>
@@ -26,31 +32,108 @@
 <div class="container-fluid">
     <h2>Home</h2>
     <a href="/home/"><i class="fas fa-plus"></i></a>
+
+<!--    &lt;!&ndash; Button trigger modal &ndash;&gt;-->
+<!--    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">-->
+<!--        Launch demo modal-->
+<!--    </button>-->
+
+<!--    &lt;!&ndash; Modal &ndash;&gt;-->
+<!--    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">-->
+<!--        <div class="modal-dialog modal-dialog-scrollable">-->
+<!--            <div class="modal-content">-->
+<!--                <div class="modal-header">-->
+<!--                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>-->
+<!--                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>-->
+<!--                </div>-->
+<!--                <div class="modal-body"></div>-->
+<!--                <div class="modal-footer">-->
+<!--                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>-->
+<!--                    <button type="button" class="btn btn-primary">Save changes</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <div id="orderModal" class="modal hide fade" role="dialog"-->
+<!--         aria-labelledby="orderModalLabel" aria-hidden="true">-->
+<!--        <div class="modal-header">-->
+<!--            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>-->
+<!--            <h3>Order</h3>-->
+<!--        </div>-->
+<!--        <div id="orderDetails" class="modal-body"></div>-->
+
+<!--        <div id="orderItems" class="modal-body"></div>-->
+<!--        <div class="modal-footer">-->
+<!--            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>-->
+<!--        </div>-->
+<!--    </div>-->
+
     <div th:if="${not articles.isEmpty()}">
-        <table class="table table-striped">
+        <table>
             <tr>
                 <th>ID</th>
                 <th>URL</th>
                 <th>Title</th>
-                <th>Rating</th>
-                <th>Content</th>
+                <th>Rating1</th>
+                <th>Rating2</th>
+                <th>Rating3</th>
+                <th>Rating4</th>
+<!--                <th>Content</th>-->
+                <th>Created</th>
                 <th>Action</th>
             </tr>
-            <tr th:each="article : ${articles}">
+            <tr th:each="article : ${articles}" data-toggle="modal" th:data-id="${article.getId()}" data-target="#orderModal">
                 <td th:text="${article.getId()}"></td>
                 <td th:text="${article.getUrl()}"></td>
                 <td th:text="${article.getTitle()}"></td>
-                <td th:text="${article.getRating()}"></td>
-                <td th:text="${#strings.substring(article.getContent(),0,100)} + '...'"></td>
-<!--                <td th:text="${article.getContent()}"></td>-->
+                <td th:text="${article.getRatingId().getRating1()}"></td>
+                <td th:text="${article.getRatingId().getRating2()}"></td>
+                <td th:text="${article.getRatingId().getRating3()}"></td>
+                <td th:text="${article.getRatingId().getRating4()}"></td>
+<!--                <td th:text="${#strings.substring(article.getContent(),0,100)} + '...'"></td>-->
+                <!--                <td th:text="${article.getContent()}"></td>-->
+                <td th:text="${#dates.format(article.getCreatedAt(), 'dd-MM-yyyy HH:mm:ss')}"></td>
                 <td>
-                    <a th:href="@{'/home/view/' + ${article.getId()}}"><i class="fas fa-eye"></i></a>
-                    <a th:href="@{'/home/edit/' + ${article.getId()}}"><i class="fas fa-edit"></i></a>
-                    <a th:href="@{'/home/delete/' + ${article.getId()}}"><i class="fas fa-trash"></i></a>
+<!--                    <a th:href="@{'/home/view/' + ${article.getId()}}"><i class="fas fa-eye"></i></a>-->
+<!--                    <a th:href="@{'/home/edit/' + ${article.getId()}}"><i class="fas fa-edit"></i></a>-->
+<!--                    <a th:href="@{'/home/delete/' + ${article.getId()}}"><i class="fas fa-trash"></i></a>-->
+<!--                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">modal</button>-->
                 </td>
             </tr>
         </table>
     </div>
 </div>
+<script>
+    // $(function(){
+    //     $('#orderModal').modal({
+    //         keyboard: true,
+    //         backdrop: "static",
+    //         show:false,
+    //
+    //     }).on('show', function(){ //subscribe to show method
+    //         let getIdFromRow = $(event.target).closest('tr').data('id'); //get the id from tr
+    //         //make your ajax call populate items or what even you need
+    //         $(this).find('#orderDetails').html($('<b> Order Id selected: ' + getIdFromRow  + '</b>'))
+    //     });
+    // });
+
+    // // When the user clicks on the button, open the modal
+    // btn.onclick = function() {
+    //     modal.style.display = "block";
+    // }
+    //
+    // // When the user clicks on <span> (x), close the modal
+    // span.onclick = function() {
+    //     modal.style.display = "none";
+    // }
+    //
+    // // When the user clicks anywhere outside of the modal, close it
+    // window.onclick = function(event) {
+    //     if (event.target == modal) {
+    //         modal.style.display = "none";
+    //     }
+    // }
+</script>
 </body>
 </html>
