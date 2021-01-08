@@ -53,7 +53,7 @@ public class RatingService {
                 count = rating.getRating3();
                 rating.setRating3(++count);
                 break;
-            case "satire" :
+            case "unverified" :
                 count = rating.getRating4();
                 rating.setRating4(++count);
                 break;

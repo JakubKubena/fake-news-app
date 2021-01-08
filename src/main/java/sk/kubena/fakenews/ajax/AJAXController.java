@@ -67,7 +67,7 @@ public class AJAXController {
                 case "misleading" :
                     ratingService.addRating(new Rating(0, 0, 1, 0, article));
                     break;
-                case "satire" :
+                case "unverified" :
                     ratingService.addRating(new Rating(0, 0, 0, 1, article));
                     break;
             }
