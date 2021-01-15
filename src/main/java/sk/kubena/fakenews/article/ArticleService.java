@@ -3,7 +3,9 @@ package sk.kubena.fakenews.article;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sk.kubena.fakenews.helper.CSVHelper;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,5 +42,11 @@ public class ArticleService {
     @Transactional
     public Article checkIfArticleAlreadyExists(Article article) {
         return articleRepository.findArticleByUrl(article.getUrl());
+    }
+
+    public ByteArrayInputStream load() {
+        List<Article> articles = articleRepository.findAll();
+
+        return CSVHelper.articlesToCSV(articles);
     }
 }

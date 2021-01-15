@@ -21,6 +21,9 @@ public class Article {
     @Column(name = "url")
     private String url;
 
+    @Column(name = "hostname")
+    private String hostname;
+
     @Column(name = "title")
     private String title;
 
@@ -46,8 +49,9 @@ public class Article {
     public Article() {
     }
 
-    public Article(String url, String title, String rating, String content, Timestamp createdAt, Timestamp updatedAt) {
+    public Article(String url, String hostname, String title, String rating, String content, Timestamp createdAt, Timestamp updatedAt) {
         this.url = url;
+        this.hostname = hostname;
         this.title = title;
         this.rating = rating;
         this.content = content;
@@ -69,6 +73,14 @@ public class Article {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public String getHostname() {
+        return hostname;
+    }
+
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
     }
 
     public String getTitle() {
@@ -122,6 +134,7 @@ public class Article {
     @Override
     public String toString() {
         return "url= " + url + '\n' +
+                "hostname= " + hostname + '\n' +
                 "title= " + title + '\n' +
                 "rating= " + rating + '\n' +
 //                "content= " + content + '\n' +

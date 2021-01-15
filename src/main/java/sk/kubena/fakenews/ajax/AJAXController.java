@@ -1,7 +1,13 @@
 package sk.kubena.fakenews.ajax;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,8 +18,11 @@ import sk.kubena.fakenews.article.ArticleService;
 import sk.kubena.fakenews.rating.Rating;
 import sk.kubena.fakenews.rating.RatingService;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 @Controller
-public class AJAXController {
+public class AJAXController<CSVService> {
 
 //    Logger logger = LoggerFactory.getLogger(LoggingController.class);
 
@@ -87,6 +96,17 @@ public class AJAXController {
         model.addAttribute("articles", articleService.getAllArticles());
 
         return "views/home";
+    }
+
+    @GetMapping("/export")
+    public ResponseEntity<Resource> getFile() {
+        String filename = "articles.csv";
+        InputStreamResource file = new InputStreamResource(articleService.load());
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                .contentType(MediaType.parseMediaType("application/csv"))
+                .body(file);
     }
 
 //    @PostMapping("/api")
