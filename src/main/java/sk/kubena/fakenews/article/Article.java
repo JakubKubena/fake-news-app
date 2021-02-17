@@ -34,6 +34,9 @@ public class Article {
     @Column(name = "content")
     private String content;
 
+    @Transient
+    private String token;
+
     @OneToOne(mappedBy = "articleId")
     @JsonIgnoreProperties("articleId")
     private Rating ratingId;
@@ -49,14 +52,13 @@ public class Article {
     public Article() {
     }
 
-    public Article(String url, String hostname, String title, String rating, String content, Timestamp createdAt, Timestamp updatedAt) {
+    public Article(String url, String hostname, String title, String rating, String content, String token) {
         this.url = url;
         this.hostname = hostname;
         this.title = title;
         this.rating = rating;
         this.content = content;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.token = token;
     }
 
     public int getId() {
@@ -107,6 +109,14 @@ public class Article {
         this.content = content;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     public Rating getRatingId() {
         return ratingId;
     }
@@ -137,6 +147,7 @@ public class Article {
                 "hostname= " + hostname + '\n' +
                 "title= " + title + '\n' +
                 "rating= " + rating + '\n' +
+                "token= " + token + '\n' +
 //                "content= " + content + '\n' +
                 "createdAt= " + createdAt + '\n' +
                 "updatedAt= " + updatedAt + '\n';

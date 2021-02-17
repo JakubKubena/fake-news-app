@@ -1,8 +1,8 @@
 package sk.kubena.fakenews.ajax;
 
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
@@ -17,75 +17,113 @@ import sk.kubena.fakenews.article.Article;
 import sk.kubena.fakenews.article.ArticleService;
 import sk.kubena.fakenews.rating.Rating;
 import sk.kubena.fakenews.rating.RatingService;
-
-import java.io.FileWriter;
-import java.io.IOException;
+import sk.kubena.fakenews.token.Token;
+import sk.kubena.fakenews.token.TokenGenerator;
+import sk.kubena.fakenews.token.TokenService;
 
 @Controller
-public class AJAXController<CSVService> {
+public class AJAXController {
 
-//    Logger logger = LoggerFactory.getLogger(LoggingController.class);
+    private static final Logger logger = LoggerFactory.getLogger(AJAXController.class);
 
     private final ArticleService articleService;
     private final RatingService ratingService;
+    private final TokenService tokenService;
 
     @Autowired
-    public AJAXController(ArticleService articleService, RatingService ratingService) {
+    public AJAXController(ArticleService articleService, RatingService ratingService, TokenService tokenService) {
         this.articleService = articleService;
         this.ratingService = ratingService;
+        this.tokenService = tokenService;
+    }
+
+    @GetMapping(path = "/uninstalled/{tokenString}")
+    public ResponseEntity<?> uninstalledResponseEntity(@PathVariable String tokenString) {
+        if (tokenService.isTokenValid(tokenString)) {
+            tokenService.invalidateToken(tokenString);
+            logger.info("\nExtension '{}' was uninstalled and its token is now invalid.", tokenString);
+        } else {
+            logger.warn("\nToken '{}' is already invalid or doesnt exist.", tokenString);
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping(path = "/request-token")
+    public ResponseEntity<String> tokenResponseEntity() {
+        String tokenString = TokenGenerator.generateType1UUID().toString();
+        tokenService.addToken(new Token(tokenString, true));
+        logger.info("\nExtension was installed and a new token '{}' was generated.", tokenString);
+
+        return ResponseEntity.ok(tokenString);
     }
 
     @PostMapping(path = "/request-ratings", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> ratingResponseEntity(@RequestBody Article article) {
-        System.out.println("article: \n" + article);
-        Article existingArticle = articleService.checkIfArticleAlreadyExists(article);
-        System.out.println("existingArticle: \n" + existingArticle);
-        JSONObject responseJson = new JSONObject();
+        JSONObject responseJson;
+        if (tokenService.isTokenValid(article.getToken())) {
+            logger.info("\nReceived rating request article: \nURL: {}\nTitle: {}\nToken: {}\n", article.getUrl(), article.getTitle(), article.getToken());
 
-        if (existingArticle == null) {
-            responseJson.put("rating1", 0);
-            responseJson.put("rating2", 0);
-            responseJson.put("rating3", 0);
-            responseJson.put("rating4", 0);
+            Article existingArticle = articleService.checkIfArticleAlreadyExists(article);
+
+            responseJson = new JSONObject();
+
+            if (existingArticle == null) {
+                responseJson.put("rating1", 0);
+                responseJson.put("rating2", 0);
+                responseJson.put("rating3", 0);
+                responseJson.put("rating4", 0);
+                logger.info("\nNo record of article - sending 0 ratings: {}", responseJson);
+            } else {
+                logger.info("\nFound a record of the received article: \n{}\n", existingArticle);
+                Rating rating = ratingService.getRatingsOfArticle(existingArticle);
+                responseJson.put("rating1", rating.getRating1());
+                responseJson.put("rating2", rating.getRating2());
+                responseJson.put("rating3", rating.getRating3());
+                responseJson.put("rating4", rating.getRating4());
+                logger.info("\nRecord of article found - sending ratings: {}", responseJson);
+            }
+
+            return ResponseEntity.ok().header("Content-Type", "application/json").body(responseJson.toString());
         } else {
-            System.out.println(existingArticle.toString());
-            Rating rating = ratingService.getRatingsOfArticle(existingArticle);
-            responseJson.put("rating1", rating.getRating1());
-            responseJson.put("rating2", rating.getRating2());
-            responseJson.put("rating3", rating.getRating3());
-            responseJson.put("rating4", rating.getRating4());
-        }
-        System.out.println("responseJson: " + responseJson);
+            logger.warn("\nToken '{}' is already invalid or doesnt exist.", article.getToken());
 
-        return ResponseEntity.ok().header("Content-Type", "application/json").body(responseJson.toString());
+            return ResponseEntity.ok().build();
+        }
     }
 
     @PostMapping(path = "/api", consumes = "application/json")
     public ResponseEntity<?> articleResponseEntity(@RequestBody Article article) {
-        Article existingArticle = articleService.checkIfArticleAlreadyExists(article);
+        if (tokenService.isTokenValid(article.getToken())) {
+            Article existingArticle = articleService.checkIfArticleAlreadyExists(article);
 
-        if (existingArticle == null) {
-            articleService.addArticle(article);
-            switch (article.getRating()) {
-                case "true" :
-                    ratingService.addRating(new Rating(1, 0, 0, 0, article));
-                    break;
-                case "false" :
-                    ratingService.addRating(new Rating(0, 1, 0, 0, article));
-                    break;
-                case "misleading" :
-                    ratingService.addRating(new Rating(0, 0, 1, 0, article));
-                    break;
-                case "unverified" :
-                    ratingService.addRating(new Rating(0, 0, 0, 1, article));
-                    break;
+            if (existingArticle == null) {
+                articleService.addArticle(article);
+                switch (article.getRating()) {
+                    case "true":
+                        ratingService.addRating(new Rating(1, 0, 0, 0, article));
+                        break;
+                    case "false":
+                        ratingService.addRating(new Rating(0, 1, 0, 0, article));
+                        break;
+                    case "misleading":
+                        ratingService.addRating(new Rating(0, 0, 1, 0, article));
+                        break;
+                    case "unverified":
+                        ratingService.addRating(new Rating(0, 0, 0, 1, article));
+                        break;
+                }
+                System.out.println("New article: \n" + article.toString());
+                System.out.println("-------------");
+            } else {
+                System.out.println("Existing article: \n" + existingArticle.toString());
+                System.out.println("-------------");
+                System.out.println("Existing article ID: \n" + existingArticle.getId());
+                System.out.println("-------------");
+                System.out.println("Incoming article: \n" + article.toString());
+                System.out.println("-------------");
+                ratingService.incrementRating(existingArticle, article);
             }
-            System.out.println("New article: \n" + article.toString());
-        } else {
-            System.out.println("Existing article: \n" + existingArticle.toString());
-            System.out.println("EA ID: \n" + existingArticle.getId());
-            System.out.println("inc article: \n" + article.toString());
-            ratingService.incrementRating(existingArticle, article);
         }
 
         return ResponseEntity.ok().build();

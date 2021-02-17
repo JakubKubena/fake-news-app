@@ -54,16 +54,6 @@ public class Rating {
         this.articleId = articleId;
     }
 
-    public Rating(int rating1, int rating2, int rating3, int rating4, Article articleId, Timestamp createdAt, Timestamp updatedAt) {
-        this.rating1 = rating1;
-        this.rating2 = rating2;
-        this.rating3 = rating3;
-        this.rating4 = rating4;
-        this.articleId = articleId;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
     public int getId() {
         return id;
     }
