@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "article")
+@Table(name = "articles")
 public class Article {
 
     @Id
@@ -49,14 +49,12 @@ public class Article {
     public Article() {
     }
 
-    public Article(String url, String hostname, String title, String rating, String content, Timestamp createdAt, Timestamp updatedAt) {
+    public Article(String url, String hostname, String title, String rating, String content) {
         this.url = url;
         this.hostname = hostname;
         this.title = title;
         this.rating = rating;
         this.content = content;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public int getId() {
