@@ -10,7 +10,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "rating")
+@Table(name = "ratings")
 public class Rating {
 
     @Id

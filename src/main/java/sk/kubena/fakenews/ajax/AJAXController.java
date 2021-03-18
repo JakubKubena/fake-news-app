@@ -136,6 +136,11 @@ public class AJAXController {
         return "views/home";
     }
 
+    @GetMapping("/login")
+    public String login(Model model) {
+        return "views/login";
+    }
+
     @GetMapping("/export")
     public ResponseEntity<Resource> getFile() {
         String filename = "articles.csv";
