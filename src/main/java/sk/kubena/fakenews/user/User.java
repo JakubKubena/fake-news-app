@@ -8,7 +8,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 public class User {
 
     @Id
@@ -16,8 +16,8 @@ public class User {
     @Column(name = "id", nullable = false)
     private int id;
 
-    @Column(name = "username", unique = true, nullable = false)
-    private String username;
+    @Column(name = "email", unique = true, nullable = false)
+    private String email;
 
     @Column(name = "password", nullable = false)
     private String password;
@@ -40,8 +40,8 @@ public class User {
     public User() {
     }
 
-    public User(String username, String password, boolean enabled, Role roleId) {
-        this.username = username;
+    public User(String email, String password, boolean enabled, Role roleId) {
+        this.email = email;
         this.password = password;
         this.enabled = enabled;
         this.roleId = roleId;
@@ -55,12 +55,12 @@ public class User {
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {

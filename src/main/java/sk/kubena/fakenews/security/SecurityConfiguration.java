@@ -32,9 +32,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
         auth.jdbcAuthentication().dataSource(dataSource)
                 .usersByUsernameQuery(
-                        "SELECT username, password, enabled FROM users WHERE username=?")
+                        "SELECT email, password, enabled FROM user WHERE email=?")
                 .authoritiesByUsernameQuery(
-                        "SELECT username, name FROM users INNER JOIN roles ON (roles.id=users.role_id) WHERE username=?");
+                        "SELECT email, name FROM user INNER JOIN role ON (role.id=user.role_id) WHERE email=?");
     }
 
     @Override
@@ -45,8 +45,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+//                .csrf().disable()
                 .authorizeRequests()
-                    .antMatchers("/", "/api", "/request-ratings")
+                    .antMatchers("/", "/registration", "/user/registration", "/api", "/request-ratings")
                     .permitAll()
                     .anyRequest()
                     .authenticated()
@@ -54,12 +55,12 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .formLogin()
                     .loginPage("/login")
                     .usernameParameter("email")
+                    .passwordParameter("password")
                     .permitAll()
                 .and()
                     .logout()
                     .permitAll();
 
-//        httpSecurity.csrf().disable();
 //        httpSecurity.headers().frameOptions().disable();
     }
 }

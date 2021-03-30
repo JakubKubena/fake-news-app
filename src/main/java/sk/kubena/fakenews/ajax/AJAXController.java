@@ -24,7 +24,7 @@ import sk.kubena.fakenews.token.TokenService;
 @Controller
 public class AJAXController {
 
-    private static final Logger logger = LoggerFactory.getLogger(AJAXController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AJAXController.class);
 
     private final ArticleService articleService;
     private final RatingService ratingService;
@@ -41,9 +41,9 @@ public class AJAXController {
     public ResponseEntity<?> uninstalledResponseEntity(@PathVariable String tokenString) {
         if (tokenService.isTokenValid(tokenString)) {
             tokenService.invalidateToken(tokenString);
-            logger.info("\nExtension '{}' was uninstalled and its token is now invalid.", tokenString);
+            LOGGER.info("\nExtension '{}' was uninstalled and its token is now invalid.", tokenString);
         } else {
-            logger.warn("\nToken '{}' is already invalid or doesnt exist.", tokenString);
+            LOGGER.warn("\nToken '{}' is already invalid or doesnt exist.", tokenString);
         }
 
         return ResponseEntity.ok().build();
@@ -53,7 +53,7 @@ public class AJAXController {
     public ResponseEntity<String> tokenResponseEntity() {
         String tokenString = TokenGenerator.generateType1UUID().toString();
         tokenService.addToken(new Token(tokenString, true));
-        logger.info("\nExtension was installed and a new token '{}' was generated.", tokenString);
+        LOGGER.info("\nExtension was installed and a new token '{}' was generated.", tokenString);
 
         return ResponseEntity.ok(tokenString);
     }
@@ -62,7 +62,7 @@ public class AJAXController {
     public ResponseEntity<?> ratingResponseEntity(@RequestBody Article article) {
         JSONObject responseJson;
         if (tokenService.isTokenValid(article.getToken())) {
-            logger.info("\nReceived rating request article: \nURL: {}\nTitle: {}\nToken: {}\n", article.getUrl(), article.getTitle(), article.getToken());
+            LOGGER.info("\nReceived rating request article: \nURL: {}\nTitle: {}\nToken: {}\n", article.getUrl(), article.getTitle(), article.getToken());
 
             Article existingArticle = articleService.checkIfArticleAlreadyExists(article);
 
@@ -73,20 +73,20 @@ public class AJAXController {
                 responseJson.put("rating2", 0);
                 responseJson.put("rating3", 0);
                 responseJson.put("rating4", 0);
-                logger.info("\nNo record of article - sending 0 ratings: {}", responseJson);
+                LOGGER.info("\nNo record of article - sending 0 ratings: {}", responseJson);
             } else {
-                logger.info("\nFound a record of the received article: \n{}\n", existingArticle);
+                LOGGER.info("\nFound a record of the received article: \n{}\n", existingArticle);
                 Rating rating = ratingService.getRatingsOfArticle(existingArticle);
                 responseJson.put("rating1", rating.getRating1());
                 responseJson.put("rating2", rating.getRating2());
                 responseJson.put("rating3", rating.getRating3());
                 responseJson.put("rating4", rating.getRating4());
-                logger.info("\nRecord of article found - sending ratings: {}", responseJson);
+                LOGGER.info("\nRecord of article found - sending ratings: {}", responseJson);
             }
 
             return ResponseEntity.ok().header("Content-Type", "application/json").body(responseJson.toString());
         } else {
-            logger.warn("\nToken '{}' is already invalid or doesnt exist.", article.getToken());
+            LOGGER.warn("\nToken '{}' is already invalid or doesnt exist.", article.getToken());
 
             return ResponseEntity.ok().build();
         }

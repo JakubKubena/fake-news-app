@@ -13,11 +13,28 @@ public class MyUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String username) {
-        User user = userRepository.findByUsername(username);
+    public UserDetails loadUserByUsername(String email) {
+        User user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new UsernameNotFoundException(username);
+            throw new UsernameNotFoundException("No user found with username: "+ email);
         }
+//        boolean enabled = true;
+//        boolean accountNonExpired = true;
+//        boolean credentialsNonExpired = true;
+//        boolean accountNonLocked = true;
+//        return  new org.springframework.security.core.userdetails.User
+//          (user.getEmail(),
+//          user.getPassword().toLowerCase(), enabled, accountNonExpired,
+//          credentialsNonExpired, accountNonLocked,
+//          getAuthorities(user.getRoles()));
         return new MyUserPrincipal(user);
     }
+
+//    private static List<GrantedAuthority> getAuthorities (List<String> roles) {
+//        List<GrantedAuthority> authorities = new ArrayList<>();
+//        for (String role : roles) {
+//            authorities.add(new SimpleGrantedAuthority(role));
+//        }
+//        return authorities;
+//    }
 }
