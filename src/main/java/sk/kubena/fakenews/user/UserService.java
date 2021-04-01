@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import sk.kubena.fakenews.ajax.AJAXController;
 import sk.kubena.fakenews.error.UserAlreadyExistException;
 import sk.kubena.fakenews.role.RoleRepository;
-import sk.kubena.fakenews.token.TokenGenerator;
+import sk.kubena.fakenews.ajax.TokenGenerator;
 
 
 @Service
