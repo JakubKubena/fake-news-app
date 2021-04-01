@@ -3,6 +3,9 @@ package sk.kubena.fakenews.rating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sk.kubena.fakenews.article.Article;
+import sk.kubena.fakenews.article.ArticleDTO;
+import sk.kubena.fakenews.article.ArticleRepository;
+import sk.kubena.fakenews.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,11 +13,14 @@ import java.util.List;
 @Service
 public class RatingService {
 
+    private static final String[] VALUES = {"true", "false", "misleading", "unverified"};
     private final RatingRepository ratingRepository;
+    private final ArticleRepository articleRepository;
 
     @Autowired
-    public RatingService(RatingRepository ratingRepository) {
+    public RatingService(RatingRepository ratingRepository, ArticleRepository articleRepository) {
         this.ratingRepository = ratingRepository;
+        this.articleRepository = articleRepository;
     }
 
     public List<Rating> getAllRatings() {
@@ -37,10 +43,10 @@ public class RatingService {
         ratingRepository.deleteById(id);
     }
 
-    public void incrementRating(Article existingArticle, Article newArticle) {
-        Rating rating = ratingRepository.findRatingByArticleId(existingArticle);
+    public void incrementRating(ArticleDTO articleDTO) {
+        Rating rating = ratingRepository.findByArticle(articleRepository.findByUrl(articleDTO.getUrl()));
         int count;
-        switch (newArticle.getRating()) {
+        switch (articleDTO.getUserRating()) {
             case "true" :
                 count = rating.getRating1();
                 rating.setRating1(++count);
@@ -62,6 +68,6 @@ public class RatingService {
     }
 
     public Rating getRatingsOfArticle(Article existingArticle) {
-        return ratingRepository.findRatingByArticleId(existingArticle);
+        return ratingRepository.findByArticle(existingArticle);
     }
 }

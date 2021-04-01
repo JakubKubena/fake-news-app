@@ -6,7 +6,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 @PasswordMatches
-public class UserDto {
+public class UserDTO {
 
     @NotNull
     @NotEmpty
@@ -17,10 +17,10 @@ public class UserDto {
     private String password;
     private String matchingPassword;
 
-    public UserDto() {
+    public UserDTO() {
     }
 
-    public UserDto(@NotNull @NotEmpty String email, @NotNull @NotEmpty String password, String matchingPassword) {
+    public UserDTO(@NotNull @NotEmpty String email, @NotNull @NotEmpty String password, String matchingPassword) {
         this.email = email;
         this.password = password;
         this.matchingPassword = matchingPassword;
@@ -48,5 +48,14 @@ public class UserDto {
 
     public void setMatchingPassword(String matchingPassword) {
         this.matchingPassword = matchingPassword;
+    }
+
+    @Override
+    public String toString() {
+        return "UserDTO{" +
+                "email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", matchingPassword='" + matchingPassword + '\'' +
+                '}';
     }
 }

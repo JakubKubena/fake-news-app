@@ -3,7 +3,7 @@ package sk.kubena.fakenews.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import sk.kubena.fakenews.user.UserDto;
+import sk.kubena.fakenews.user.UserDTO;
 
 public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, Object> {
 
@@ -14,7 +14,7 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
 
     @Override
     public boolean isValid(final Object obj, final ConstraintValidatorContext context) {
-        final UserDto user = (UserDto) obj;
+        final UserDTO user = (UserDTO) obj;
         return user.getPassword().equals(user.getMatchingPassword());
     }
 

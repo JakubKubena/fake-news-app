@@ -26,10 +26,10 @@ public class CSVHelper {
                         article.getHostname(),
                         article.getUrl(),
                         article.getTitle(),
-                        String.valueOf(article.getRatingId().getRating1()),
-                        String.valueOf(article.getRatingId().getRating2()),
-                        String.valueOf(article.getRatingId().getRating3()),
-                        String.valueOf(article.getRatingId().getRating4()),
+                        String.valueOf(article.getRating().getRating1()),
+                        String.valueOf(article.getRating().getRating2()),
+                        String.valueOf(article.getRating().getRating3()),
+                        String.valueOf(article.getRating().getRating4()),
                         String.valueOf(article.getCreatedAt())
                 );
 

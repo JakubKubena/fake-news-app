@@ -25,9 +25,12 @@ public class User {
     @Column(name = "enabled", nullable = false)
     private boolean enabled;
 
+    @Column(name = "token", nullable = false)
+    private String token;
+
     @ManyToOne
     @JoinColumn(name="role_id", nullable = false)
-    private Role roleId;
+    private Role role;
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -40,11 +43,12 @@ public class User {
     public User() {
     }
 
-    public User(String email, String password, boolean enabled, Role roleId) {
+    public User(String email, String password, boolean enabled, String token, Role role) {
         this.email = email;
         this.password = password;
         this.enabled = enabled;
-        this.roleId = roleId;
+        this.token = token;
+        this.role = role;
     }
 
     public int getId() {
@@ -71,7 +75,7 @@ public class User {
         this.password = password;
     }
 
-    public boolean getEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 
@@ -79,12 +83,20 @@ public class User {
         this.enabled = enabled;
     }
 
-    public Role getRoleId() {
-        return roleId;
+    public String getToken() {
+        return token;
     }
 
-    public void setRoleId(Role roleId) {
-        this.roleId = roleId;
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     public Timestamp getCreatedAt() {
@@ -101,5 +113,19 @@ public class User {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", enabled=" + enabled +
+                ", token='" + token + '\'' +
+                ", role=" + role +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

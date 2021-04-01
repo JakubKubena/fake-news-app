@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,12 +15,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import sk.kubena.fakenews.article.Article;
+import sk.kubena.fakenews.article.ArticleDTO;
 import sk.kubena.fakenews.article.ArticleService;
 import sk.kubena.fakenews.rating.Rating;
 import sk.kubena.fakenews.rating.RatingService;
-import sk.kubena.fakenews.token.Token;
-import sk.kubena.fakenews.token.TokenGenerator;
-import sk.kubena.fakenews.token.TokenService;
+import sk.kubena.fakenews.user.UserDTO;
+import sk.kubena.fakenews.user.UserService;
 
 @Controller
 public class AJAXController {
@@ -28,43 +29,49 @@ public class AJAXController {
 
     private final ArticleService articleService;
     private final RatingService ratingService;
-    private final TokenService tokenService;
+    private final UserService userService;
 
     @Autowired
-    public AJAXController(ArticleService articleService, RatingService ratingService, TokenService tokenService) {
+    public AJAXController(ArticleService articleService, RatingService ratingService, UserService userService) {
         this.articleService = articleService;
         this.ratingService = ratingService;
-        this.tokenService = tokenService;
+        this.userService = userService;
     }
 
-    @GetMapping(path = "/uninstalled/{tokenString}")
-    public ResponseEntity<?> uninstalledResponseEntity(@PathVariable String tokenString) {
-        if (tokenService.isTokenValid(tokenString)) {
-            tokenService.invalidateToken(tokenString);
-            LOGGER.info("\nExtension '{}' was uninstalled and its token is now invalid.", tokenString);
+    // TODO: 31/03/2021 handle extension uninstallation
+//    @GetMapping(path = "/uninstalled/{tokenString}")
+//    public ResponseEntity<?> uninstalledResponseEntity(@PathVariable String tokenString) {
+//        if (tokenService.isTokenValid(tokenString)) {
+//            tokenService.invalidateToken(tokenString);
+//            LOGGER.info("\nExtension '{}' was uninstalled and its token is now invalid.", tokenString);
+//        } else {
+//            LOGGER.warn("\nToken '{}' is already invalid or doesnt exist.", tokenString);
+//        }
+//
+//        return ResponseEntity.ok().build();
+//    }
+
+    // TODO: 31/03/2021  make this method less awful, fix csrf
+    @PostMapping(path = "/authenticate")
+    public ResponseEntity<String> authenticateUser(@RequestBody UserDTO userDTO) {
+        LOGGER.info(userDTO.toString());
+        if (userService.authenticateUser(userDTO) == null) {
+            LOGGER.info("Attempted login: '{}' : '{}'", userDTO.getEmail(), userDTO.getPassword());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Wrong email or password!");
         } else {
-            LOGGER.warn("\nToken '{}' is already invalid or doesnt exist.", tokenString);
+            LOGGER.info("User '{}' has successfully logged in to an extension.", userDTO.getEmail());
+            return ResponseEntity.ok(userService.authenticateUser(userDTO));
         }
-
-        return ResponseEntity.ok().build();
     }
 
-    @GetMapping(path = "/request-token")
-    public ResponseEntity<String> tokenResponseEntity() {
-        String tokenString = TokenGenerator.generateType1UUID().toString();
-        tokenService.addToken(new Token(tokenString, true));
-        LOGGER.info("\nExtension was installed and a new token '{}' was generated.", tokenString);
-
-        return ResponseEntity.ok(tokenString);
-    }
-
+    // TODO: 01/04/2021 connect article and user through ID instead of token
     @PostMapping(path = "/request-ratings", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<?> ratingResponseEntity(@RequestBody Article article) {
+    public ResponseEntity<?> ratingResponseEntity(@RequestBody ArticleDTO articleDTO) {
         JSONObject responseJson;
-        if (tokenService.isTokenValid(article.getToken())) {
-            LOGGER.info("\nReceived rating request article: \nURL: {}\nTitle: {}\nToken: {}\n", article.getUrl(), article.getTitle(), article.getToken());
+        if (userService.tokenExists(articleDTO.getToken())) {
+            LOGGER.info("Requested ratings for article: {}", articleDTO.toString());
 
-            Article existingArticle = articleService.checkIfArticleAlreadyExists(article);
+            Article existingArticle = articleService.checkIfArticleAlreadyExists(articleDTO);
 
             responseJson = new JSONObject();
 
@@ -73,56 +80,55 @@ public class AJAXController {
                 responseJson.put("rating2", 0);
                 responseJson.put("rating3", 0);
                 responseJson.put("rating4", 0);
-                LOGGER.info("\nNo record of article - sending 0 ratings: {}", responseJson);
+                LOGGER.info("No record of article found - sending 0 ratings: {}", responseJson);
             } else {
-                LOGGER.info("\nFound a record of the received article: \n{}\n", existingArticle);
+                LOGGER.info("Found a record: {}", existingArticle.toString());
                 Rating rating = ratingService.getRatingsOfArticle(existingArticle);
                 responseJson.put("rating1", rating.getRating1());
                 responseJson.put("rating2", rating.getRating2());
                 responseJson.put("rating3", rating.getRating3());
                 responseJson.put("rating4", rating.getRating4());
-                LOGGER.info("\nRecord of article found - sending ratings: {}", responseJson);
+                LOGGER.info("Record of article found - sending ratings: {}", responseJson);
             }
 
             return ResponseEntity.ok().header("Content-Type", "application/json").body(responseJson.toString());
         } else {
-            LOGGER.warn("\nToken '{}' is already invalid or doesnt exist.", article.getToken());
+            LOGGER.warn("Token '{}' is invalid.", articleDTO.getToken());
 
             return ResponseEntity.ok().build();
         }
     }
 
+    // TODO: 01/04/2021 check if rating value is 1 of the 4
     @PostMapping(path = "/api", consumes = "application/json")
-    public ResponseEntity<?> articleResponseEntity(@RequestBody Article article) {
-        if (tokenService.isTokenValid(article.getToken())) {
-            Article existingArticle = articleService.checkIfArticleAlreadyExists(article);
+    public ResponseEntity<?> articleResponseEntity(@RequestBody ArticleDTO articleDTO) {
+        if (userService.tokenExists(articleDTO.getToken())) {
+            Article existingArticle = articleService.checkIfArticleAlreadyExists(articleDTO);
 
             if (existingArticle == null) {
-                articleService.addArticle(article);
-                switch (article.getRating()) {
+                switch (articleDTO.getUserRating()) {
                     case "true":
-                        ratingService.addRating(new Rating(1, 0, 0, 0, article));
+                        articleService.addArticle(articleDTO);
+                        ratingService.addRating(new Rating(1, 0, 0, 0, articleService.getArticle(articleDTO.getUrl())));
                         break;
                     case "false":
-                        ratingService.addRating(new Rating(0, 1, 0, 0, article));
+                        articleService.addArticle(articleDTO);
+                        ratingService.addRating(new Rating(0, 1, 0, 0, articleService.getArticle(articleDTO.getUrl())));
                         break;
                     case "misleading":
-                        ratingService.addRating(new Rating(0, 0, 1, 0, article));
+                        articleService.addArticle(articleDTO);
+                        ratingService.addRating(new Rating(0, 0, 1, 0, articleService.getArticle(articleDTO.getUrl())));
                         break;
                     case "unverified":
-                        ratingService.addRating(new Rating(0, 0, 0, 1, article));
+                        articleService.addArticle(articleDTO);
+                        ratingService.addRating(new Rating(0, 0, 0, 1, articleService.getArticle(articleDTO.getUrl())));
                         break;
                 }
-                System.out.println("New article: \n" + article.toString());
-                System.out.println("-------------");
+
+                LOGGER.info("New article: {}", articleDTO.toString());
             } else {
-                System.out.println("Existing article: \n" + existingArticle.toString());
-                System.out.println("-------------");
-                System.out.println("Existing article ID: \n" + existingArticle.getId());
-                System.out.println("-------------");
-                System.out.println("Incoming article: \n" + article.toString());
-                System.out.println("-------------");
-                ratingService.incrementRating(existingArticle, article);
+                LOGGER.info("New article rating: {}", articleDTO.toString());
+                ratingService.incrementRating(articleDTO);
             }
         }
 
@@ -151,33 +157,4 @@ public class AJAXController {
                 .contentType(MediaType.parseMediaType("application/csv"))
                 .body(file);
     }
-
-//    @PostMapping("/api")
-//    public ResponseEntity<?> getTitleViaAJAX(@RequestBody Article article, Errors errors) {
-//
-//        System.out.println(article.getTitle());
-//
-//        AjaxResponseBody result = new AjaxResponseBody();
-//
-//        //If error, just return a 400 bad request, along with the error message
-//        if (errors.hasErrors()) {
-//
-//            result.setMessage(errors.getAllErrors()
-//                    .stream().map(x -> x.getDefaultMessage())
-//                    .collect(Collectors.joining(",")));
-//
-//            return ResponseEntity.badRequest().body(result);
-//
-//        }
-//
-////        List<User> users = userService.findByUserNameOrEmail(search.getUsername());
-////        if (users.isEmpty()) {
-////            result.setMsg("no user found!");
-////        } else {
-////            result.setMsg("success");
-////        }
-////        result.setResult(users);
-//
-//        return ResponseEntity.ok(result);
-//    }
 }

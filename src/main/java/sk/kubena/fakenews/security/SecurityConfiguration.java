@@ -39,16 +39,22 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.ignoring().antMatchers("/resources/**");
+        web.ignoring().antMatchers("/resources/**", "/authenticate", "/request-ratings", "/api");
+//        web.ignoring().antMatchers("/resources/**");
     }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
 //                .csrf().disable()
+//                .csrf()
+//                    .ignoringAntMatchers("/authenticate", "/request-ratings", "/api")
+//                .and()
                 .authorizeRequests()
-                    .antMatchers("/", "/registration", "/user/registration", "/api", "/request-ratings")
+                    .antMatchers("/registration", "/user/registration")
                     .permitAll()
+                    .antMatchers("/")
+                    .authenticated()
                     .anyRequest()
                     .authenticated()
                 .and()
@@ -60,7 +66,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                     .logout()
                     .permitAll();
-
-//        httpSecurity.headers().frameOptions().disable();
     }
 }

@@ -5,5 +5,5 @@ import sk.kubena.fakenews.article.Article;
 
 public interface RatingRepository extends JpaRepository<Rating, Integer> {
 
-    Rating findRatingByArticleId(Article article);
+    Rating findByArticle(Article article);
 }

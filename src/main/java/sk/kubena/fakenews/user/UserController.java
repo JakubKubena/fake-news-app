@@ -39,13 +39,13 @@ public class UserController {
 
     @GetMapping("/registration")
     public String showRegistrationForm(final HttpServletRequest request, Model model) {
-        UserDto userDto = new UserDto();
+        UserDTO userDto = new UserDTO();
         model.addAttribute("user", userDto);
         return "views/registration";
     }
 
     @PostMapping("/user/registration")
-    public ModelAndView registerUserAccount(@ModelAttribute("user") @Valid final UserDto userDto, final HttpServletRequest request, final Errors errors) {
+    public ModelAndView registerUserAccount(@ModelAttribute("user") @Valid final UserDTO userDto, final HttpServletRequest request, final Errors errors) {
         LOGGER.info("Registering user account with information: {}", userDto);
 
         try {

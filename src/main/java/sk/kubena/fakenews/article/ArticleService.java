@@ -27,7 +27,19 @@ public class ArticleService {
         return articleRepository.findById(id).orElse(null);
     }
 
-    public void addArticle(Article article) {
+    public Article getArticle(String url) {
+        return articleRepository.findByUrl(url);
+    }
+
+    public void addArticle(ArticleDTO articleDTO) {
+        Article article = new Article();
+        article.setUrl(articleDTO.getUrl());
+        article.setHostname(articleDTO.getHostname());
+        article.setTitle(articleDTO.getTitle());
+        article.setUserRating(articleDTO.getUserRating());
+        article.setContent(articleDTO.getContent());
+        article.setToken(articleDTO.getToken());
+
         articleRepository.save(article);
     }
 
@@ -40,8 +52,8 @@ public class ArticleService {
     }
 
     @Transactional
-    public Article checkIfArticleAlreadyExists(Article article) {
-        return articleRepository.findArticleByUrl(article.getUrl());
+    public Article checkIfArticleAlreadyExists(ArticleDTO articleDTO) {
+        return articleRepository.findByUrl(articleDTO.getUrl());
     }
 
     public ByteArrayInputStream load() {

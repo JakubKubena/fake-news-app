@@ -2,15 +2,21 @@ package sk.kubena.fakenews.user;
 
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import sk.kubena.fakenews.ajax.AJAXController;
 import sk.kubena.fakenews.error.UserAlreadyExistException;
 import sk.kubena.fakenews.role.RoleRepository;
+import sk.kubena.fakenews.token.TokenGenerator;
 
 
 @Service
 public class UserService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AJAXController.class);
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -28,6 +34,10 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    public User getUser(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public void addUser(User user) {
         userRepository.save(user);
     }
@@ -42,24 +52,40 @@ public class UserService {
 
     @Transactional
 //    @Override
-    public User registerNewUserAccount(UserDto userDto)
+    public User registerNewUserAccount(UserDTO userDTO)
             throws UserAlreadyExistException {
 
-        if (emailExists(userDto.getEmail())) {
-            throw new UserAlreadyExistException("There is an account with that email address: " + userDto.getEmail());
+        if (emailExists(userDTO.getEmail())) {
+            throw new UserAlreadyExistException("There is an account with that email address: " + userDTO.getEmail());
         }
 
         User user = new User();
-        user.setPassword(userDto.getPassword());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setEmail(userDto.getEmail());
+        user.setPassword(userDTO.getPassword());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        user.setEmail(userDTO.getEmail());
         user.setEnabled(true);
-        user.setRoleId(roleRepository.findById(1).orElse(null));
+        user.setToken(TokenGenerator.generateType1UUID().toString());
+        user.setRole(roleRepository.findRoleByName("ADMIN"));
 //        user.setRole(Arrays.asList("ROLE_USER"));
         return userRepository.save(user);
     }
 
+    public String authenticateUser(UserDTO userDTO) {
+        User user = userRepository.findByEmail(userDTO.getEmail());
+        if (user == null) {
+            return null;
+        } else if (passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+            return user.getToken();
+        } else {
+            return null;
+        }
+    }
+
     private boolean emailExists(String email) {
         return userRepository.findByEmail(email) != null;
+    }
+
+    public boolean tokenExists(String token) {
+        return userRepository.findByToken(token) != null;
     }
 }

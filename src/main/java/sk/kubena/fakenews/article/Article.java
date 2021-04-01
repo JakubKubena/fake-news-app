@@ -28,7 +28,7 @@ public class Article {
     private String title;
 
     @Transient
-    private String rating;
+    private String userRating;
 
     @Lob
     @Column(name = "content")
@@ -37,9 +37,9 @@ public class Article {
     @Transient
     private String token;
 
-    @OneToOne(mappedBy = "articleId")
-    @JsonIgnoreProperties("articleId")
-    private Rating ratingId;
+    @OneToOne(mappedBy = "article")
+    @JsonIgnoreProperties("article")
+    private Rating rating;
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -52,15 +52,13 @@ public class Article {
     public Article() {
     }
 
-    public Article(String url, String hostname, String title, String rating, String content, String token, Timestamp createdAt, Timestamp updatedAt) {
+    public Article(String url, String hostname, String title, String userRating, String content, String token) {
         this.url = url;
         this.hostname = hostname;
         this.title = title;
-        this.rating = rating;
+        this.userRating = userRating;
         this.content = content;
         this.token = token;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
     }
 
     public int getId() {
@@ -95,12 +93,12 @@ public class Article {
         this.title = title;
     }
 
-    public String getRating() {
-        return rating;
+    public String getUserRating() {
+        return userRating;
     }
 
-    public void setRating(String rating) {
-        this.rating = rating;
+    public void setUserRating(String userRating) {
+        this.userRating = userRating;
     }
 
     public String getContent() {
@@ -119,12 +117,12 @@ public class Article {
         this.token = token;
     }
 
-    public Rating getRatingId() {
-        return ratingId;
+    public Rating getRating() {
+        return rating;
     }
 
-    public void setRatingId(Rating ratingId) {
-        this.ratingId = ratingId;
+    public void setRating(Rating rating) {
+        this.rating = rating;
     }
 
     public Timestamp getCreatedAt() {
@@ -145,13 +143,17 @@ public class Article {
 
     @Override
     public String toString() {
-        return "url= " + url + '\n' +
-                "hostname= " + hostname + '\n' +
-                "title= " + title + '\n' +
-                "rating= " + rating + '\n' +
-                "token= " + token + '\n' +
-//                "content= " + content + '\n' +
-                "createdAt= " + createdAt + '\n' +
-                "updatedAt= " + updatedAt + '\n';
+        return "Article{" +
+                "id=" + id +
+                ", url='" + url + '\'' +
+                ", hostname='" + hostname + '\'' +
+                ", title='" + title + '\'' +
+                ", userRating='" + userRating + '\'' +
+//                ", content='" + content + '\'' +
+                ", token='" + token + '\'' +
+                ", rating=" + rating +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

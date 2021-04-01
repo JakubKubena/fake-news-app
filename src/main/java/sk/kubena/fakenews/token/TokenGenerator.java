@@ -20,9 +20,9 @@ public class TokenGenerator {
         long seconds = duration.getSeconds();
         long nanos = duration.getNano();
         long timeForUuidIn100Nanos = seconds * 10000000 + nanos * 100;
-        long least12SignificatBitOfTime = (timeForUuidIn100Nanos & 0x000000000000FFFFL) >> 4;
+        long least12SignificantBitOfTime = (timeForUuidIn100Nanos & 0x000000000000FFFFL) >> 4;
         long version = 1 << 12;
-        return (timeForUuidIn100Nanos & 0xFFFFFFFFFFFF0000L) + version + least12SignificatBitOfTime;
+        return (timeForUuidIn100Nanos & 0xFFFFFFFFFFFF0000L) + version + least12SignificantBitOfTime;
     }
 
     public static UUID generateType1UUID() {

@@ -32,8 +32,8 @@ public class Rating {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "article_id", referencedColumnName = "id")
-    @JsonIgnoreProperties("ratingId")
-    private Article articleId;
+    @JsonIgnoreProperties("rating")
+    private Article article;
 
     @CreationTimestamp
     @Column(name = "created_at")
@@ -46,12 +46,12 @@ public class Rating {
     public Rating() {
     }
 
-    public Rating(int rating1, int rating2, int rating3, int rating4, Article articleId) {
+    public Rating(int rating1, int rating2, int rating3, int rating4, Article article) {
         this.rating1 = rating1;
         this.rating2 = rating2;
         this.rating3 = rating3;
         this.rating4 = rating4;
-        this.articleId = articleId;
+        this.article = article;
     }
 
     public int getId() {
@@ -94,12 +94,12 @@ public class Rating {
         this.rating4 = rating4;
     }
 
-    public Article getArticleId() {
-        return articleId;
+    public Article getArticle() {
+        return article;
     }
 
-    public void setArticleId(Article articleId) {
-        this.articleId = articleId;
+    public void setArticle(Article article) {
+        this.article = article;
     }
 
     public Timestamp getCreatedAt() {

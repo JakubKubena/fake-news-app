@@ -20,7 +20,7 @@ public class Role {
     @Column(name = "name", unique = true, nullable = false)
     private String name;
 
-    @OneToMany(mappedBy="roleId")
+    @OneToMany(mappedBy="role")
     private Set<User> users;
 
     @CreationTimestamp

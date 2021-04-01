@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ArticleRepository extends JpaRepository<Article, Integer> {
 
-    Article findArticleByUrl(String url);
+    Article findByUrl(String url);
 }
