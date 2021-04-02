@@ -1,10 +1,10 @@
 package sk.kubena.fakenews.rating;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import sk.kubena.fakenews.article.Article;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import sk.kubena.fakenews.article.Article;
+import sk.kubena.fakenews.user.User;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -18,40 +18,33 @@ public class Rating {
     @Column(name = "id", nullable = false)
     private int id;
 
-    @Column(name = "rating1")
-    private int rating1;
+    @Column(name = "value", nullable = false)
+    private String value;
 
-    @Column(name = "rating2")
-    private int rating2;
-
-    @Column(name = "rating3")
-    private int rating3;
-
-    @Column(name = "rating4")
-    private int rating4;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "article_id", referencedColumnName = "id")
-    @JsonIgnoreProperties("rating")
+    @ManyToOne
+    @JoinColumn(name="article_id", nullable = false)
     private Article article;
 
+    @ManyToOne
+    @JoinColumn(name="user_id", nullable = false)
+    private User user;
+
     @CreationTimestamp
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private Timestamp updatedAt;
 
     public Rating() {
+
     }
 
-    public Rating(int rating1, int rating2, int rating3, int rating4, Article article) {
-        this.rating1 = rating1;
-        this.rating2 = rating2;
-        this.rating3 = rating3;
-        this.rating4 = rating4;
+    public Rating(String value, Article article, User user) {
+        this.value = value;
         this.article = article;
+        this.user = user;
     }
 
     public int getId() {
@@ -62,36 +55,12 @@ public class Rating {
         this.id = id;
     }
 
-    public int getRating1() {
-        return rating1;
+    public String getValue() {
+        return value;
     }
 
-    public void setRating1(int rating1) {
-        this.rating1 = rating1;
-    }
-
-    public int getRating2() {
-        return rating2;
-    }
-
-    public void setRating2(int rating2) {
-        this.rating2 = rating2;
-    }
-
-    public int getRating3() {
-        return rating3;
-    }
-
-    public void setRating3(int rating3) {
-        this.rating3 = rating3;
-    }
-
-    public int getRating4() {
-        return rating4;
-    }
-
-    public void setRating4(int rating4) {
-        this.rating4 = rating4;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public Article getArticle() {
@@ -100,6 +69,14 @@ public class Rating {
 
     public void setArticle(Article article) {
         this.article = article;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public Timestamp getCreatedAt() {

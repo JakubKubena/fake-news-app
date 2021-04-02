@@ -2,7 +2,6 @@ package sk.kubena.fakenews.article;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import sk.kubena.fakenews.helper.CSVHelper;
 
 import java.io.ByteArrayInputStream;
@@ -23,11 +22,11 @@ public class ArticleService {
         return new ArrayList<>(articleRepository.findAll());
     }
 
-    public Article getArticle(int id) {
+    public Article getArticleById(int id) {
         return articleRepository.findById(id).orElse(null);
     }
 
-    public Article getArticle(String url) {
+    public Article getArticleByUrl(String url) {
         return articleRepository.findByUrl(url);
     }
 
@@ -36,10 +35,7 @@ public class ArticleService {
         article.setUrl(articleDTO.getUrl());
         article.setHostname(articleDTO.getHostname());
         article.setTitle(articleDTO.getTitle());
-        article.setUserRating(articleDTO.getUserRating());
         article.setContent(articleDTO.getContent());
-        article.setToken(articleDTO.getToken());
-
         articleRepository.save(article);
     }
 
@@ -51,14 +47,13 @@ public class ArticleService {
         articleRepository.deleteById(id);
     }
 
-    @Transactional
-    public Article checkIfArticleAlreadyExists(ArticleDTO articleDTO) {
-        return articleRepository.findByUrl(articleDTO.getUrl());
+    public ByteArrayInputStream load() {
+//        List<Article> articles = articleRepository.findAll();
+
+        return CSVHelper.articlesToCSV(articleRepository.findAll());
     }
 
-    public ByteArrayInputStream load() {
-        List<Article> articles = articleRepository.findAll();
-
-        return CSVHelper.articlesToCSV(articles);
+    public boolean urlExists(String url) {
+        return articleRepository.findByUrl(url) != null;
     }
 }

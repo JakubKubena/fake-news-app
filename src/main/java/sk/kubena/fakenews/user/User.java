@@ -1,11 +1,14 @@
 package sk.kubena.fakenews.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import sk.kubena.fakenews.rating.Rating;
 import sk.kubena.fakenews.role.Role;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Entity
 @Table(name = "user")
@@ -32,12 +35,15 @@ public class User {
     @JoinColumn(name="role_id", nullable = false)
     private Role role;
 
+    @OneToMany(mappedBy="user")
+    private Set<Rating> ratings;
+
     @CreationTimestamp
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private Timestamp updatedAt;
 
     public User() {
@@ -97,6 +103,14 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Set<Rating> getRatings() {
+        return ratings;
+    }
+
+    public void setRatings(Set<Rating> ratings) {
+        this.ratings = ratings;
     }
 
     public Timestamp getCreatedAt() {

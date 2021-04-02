@@ -5,9 +5,11 @@ import sk.kubena.fakenews.rating.Rating;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import sk.kubena.fakenews.user.User;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Set;
 
 @Entity
 @Table(name = "article")
@@ -18,47 +20,38 @@ public class Article {
     @Column(name = "id", nullable = false)
     private int id;
 
-    @Column(name = "url")
+    @Column(name = "url", nullable = false)
     private String url;
 
-    @Column(name = "hostname")
+    @Column(name = "hostname", nullable = false)
     private String hostname;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false)
     private String title;
 
-    @Transient
-    private String userRating;
-
     @Lob
-    @Column(name = "content")
+    @Column(name = "content", nullable = false)
     private String content;
 
-    @Transient
-    private String token;
-
-    @OneToOne(mappedBy = "article")
-    @JsonIgnoreProperties("article")
-    private Rating rating;
+    @OneToMany(mappedBy="article")
+    private Set<Rating> ratings;
 
     @CreationTimestamp
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private Timestamp createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private Timestamp updatedAt;
 
     public Article() {
     }
 
-    public Article(String url, String hostname, String title, String userRating, String content, String token) {
+    public Article(String url, String hostname, String title, String content) {
         this.url = url;
         this.hostname = hostname;
         this.title = title;
-        this.userRating = userRating;
         this.content = content;
-        this.token = token;
     }
 
     public int getId() {
@@ -93,14 +86,6 @@ public class Article {
         this.title = title;
     }
 
-    public String getUserRating() {
-        return userRating;
-    }
-
-    public void setUserRating(String userRating) {
-        this.userRating = userRating;
-    }
-
     public String getContent() {
         return content;
     }
@@ -109,20 +94,12 @@ public class Article {
         this.content = content;
     }
 
-    public String getToken() {
-        return token;
+    public Set<Rating> getRatings() {
+        return ratings;
     }
 
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public Rating getRating() {
-        return rating;
-    }
-
-    public void setRating(Rating rating) {
-        this.rating = rating;
+    public void setRatings(Set<Rating> ratings) {
+        this.ratings = ratings;
     }
 
     public Timestamp getCreatedAt() {
@@ -148,10 +125,7 @@ public class Article {
                 ", url='" + url + '\'' +
                 ", hostname='" + hostname + '\'' +
                 ", title='" + title + '\'' +
-                ", userRating='" + userRating + '\'' +
 //                ", content='" + content + '\'' +
-                ", token='" + token + '\'' +
-                ", rating=" + rating +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
                 '}';

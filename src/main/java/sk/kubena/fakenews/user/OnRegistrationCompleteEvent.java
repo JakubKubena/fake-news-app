@@ -18,8 +18,6 @@ public class OnRegistrationCompleteEvent extends ApplicationEvent {
         this.appUrl = appUrl;
     }
 
-    //
-
     public String getAppUrl() {
         return appUrl;
     }
@@ -31,5 +29,4 @@ public class OnRegistrationCompleteEvent extends ApplicationEvent {
     public User getUser() {
         return user;
     }
-
 }

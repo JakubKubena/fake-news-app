@@ -3,9 +3,6 @@ package sk.kubena.fakenews.rating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sk.kubena.fakenews.article.Article;
-import sk.kubena.fakenews.article.ArticleDTO;
-import sk.kubena.fakenews.article.ArticleRepository;
-import sk.kubena.fakenews.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,14 +10,11 @@ import java.util.List;
 @Service
 public class RatingService {
 
-    private static final String[] VALUES = {"true", "false", "misleading", "unverified"};
     private final RatingRepository ratingRepository;
-    private final ArticleRepository articleRepository;
 
     @Autowired
-    public RatingService(RatingRepository ratingRepository, ArticleRepository articleRepository) {
+    public RatingService(RatingRepository ratingRepository) {
         this.ratingRepository = ratingRepository;
-        this.articleRepository = articleRepository;
     }
 
     public List<Rating> getAllRatings() {
@@ -43,31 +37,7 @@ public class RatingService {
         ratingRepository.deleteById(id);
     }
 
-    public void incrementRating(ArticleDTO articleDTO) {
-        Rating rating = ratingRepository.findByArticle(articleRepository.findByUrl(articleDTO.getUrl()));
-        int count;
-        switch (articleDTO.getUserRating()) {
-            case "true" :
-                count = rating.getRating1();
-                rating.setRating1(++count);
-                break;
-            case "false" :
-                count = rating.getRating2();
-                rating.setRating2(++count);
-                break;
-            case "misleading" :
-                count = rating.getRating3();
-                rating.setRating3(++count);
-                break;
-            case "unverified" :
-                count = rating.getRating4();
-                rating.setRating4(++count);
-                break;
-        }
-        ratingRepository.save(rating);
-    }
-
-    public Rating getRatingsOfArticle(Article existingArticle) {
-        return ratingRepository.findByArticle(existingArticle);
+    public int getRatingCount(Article article, String value) {
+        return ratingRepository.countByArticleAndValue(article, value);
     }
 }

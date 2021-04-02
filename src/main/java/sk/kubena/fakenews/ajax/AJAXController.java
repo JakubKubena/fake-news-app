@@ -52,6 +52,7 @@ public class AJAXController {
 //    }
 
     // TODO: 31/03/2021  make this method less awful, fix csrf
+    // intercepts incoming user authentication requests
     @PostMapping(path = "/authenticate")
     public ResponseEntity<String> authenticateUser(@RequestBody UserDTO userDTO) {
         LOGGER.info(userDTO.toString());
@@ -65,30 +66,29 @@ public class AJAXController {
     }
 
     // TODO: 01/04/2021 connect article and user through ID instead of token
+    // intercepts incoming rating requests
     @PostMapping(path = "/request-ratings", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> ratingResponseEntity(@RequestBody ArticleDTO articleDTO) {
         JSONObject responseJson;
         if (userService.tokenExists(articleDTO.getToken())) {
             LOGGER.info("Requested ratings for article: {}", articleDTO.toString());
-
-            Article existingArticle = articleService.checkIfArticleAlreadyExists(articleDTO);
-
             responseJson = new JSONObject();
 
-            if (existingArticle == null) {
+            if (articleService.urlExists(articleDTO.getUrl())) {
+                Article existingArticle = articleService.getArticleByUrl(articleDTO.getUrl());
+                LOGGER.info("Found a record: {}", existingArticle);
+
+                responseJson.put("rating1", ratingService.getRatingCount(existingArticle, "true"));
+                responseJson.put("rating2", ratingService.getRatingCount(existingArticle, "false"));
+                responseJson.put("rating3", ratingService.getRatingCount(existingArticle, "misleading"));
+                responseJson.put("rating4", ratingService.getRatingCount(existingArticle, "unverified"));
+                LOGGER.info("Record of article found - sending ratings: {}", responseJson);
+            } else {
                 responseJson.put("rating1", 0);
                 responseJson.put("rating2", 0);
                 responseJson.put("rating3", 0);
                 responseJson.put("rating4", 0);
                 LOGGER.info("No record of article found - sending 0 ratings: {}", responseJson);
-            } else {
-                LOGGER.info("Found a record: {}", existingArticle.toString());
-                Rating rating = ratingService.getRatingsOfArticle(existingArticle);
-                responseJson.put("rating1", rating.getRating1());
-                responseJson.put("rating2", rating.getRating2());
-                responseJson.put("rating3", rating.getRating3());
-                responseJson.put("rating4", rating.getRating4());
-                LOGGER.info("Record of article found - sending ratings: {}", responseJson);
             }
 
             return ResponseEntity.ok().header("Content-Type", "application/json").body(responseJson.toString());
@@ -100,41 +100,23 @@ public class AJAXController {
     }
 
     // TODO: 01/04/2021 check if rating value is 1 of the 4
+    // intercepts incoming article requests
     @PostMapping(path = "/api", consumes = "application/json")
     public ResponseEntity<?> articleResponseEntity(@RequestBody ArticleDTO articleDTO) {
         if (userService.tokenExists(articleDTO.getToken())) {
-            Article existingArticle = articleService.checkIfArticleAlreadyExists(articleDTO);
-
-            if (existingArticle == null) {
-                switch (articleDTO.getUserRating()) {
-                    case "true":
-                        articleService.addArticle(articleDTO);
-                        ratingService.addRating(new Rating(1, 0, 0, 0, articleService.getArticle(articleDTO.getUrl())));
-                        break;
-                    case "false":
-                        articleService.addArticle(articleDTO);
-                        ratingService.addRating(new Rating(0, 1, 0, 0, articleService.getArticle(articleDTO.getUrl())));
-                        break;
-                    case "misleading":
-                        articleService.addArticle(articleDTO);
-                        ratingService.addRating(new Rating(0, 0, 1, 0, articleService.getArticle(articleDTO.getUrl())));
-                        break;
-                    case "unverified":
-                        articleService.addArticle(articleDTO);
-                        ratingService.addRating(new Rating(0, 0, 0, 1, articleService.getArticle(articleDTO.getUrl())));
-                        break;
-                }
-
+            // add new article, if it doesnt exist yet
+            if (!articleService.urlExists(articleDTO.getUrl())) {
+                articleService.addArticle(articleDTO);
                 LOGGER.info("New article: {}", articleDTO.toString());
-            } else {
-                LOGGER.info("New article rating: {}", articleDTO.toString());
-                ratingService.incrementRating(articleDTO);
             }
+            // add new rating for either existing or new article
+            ratingService.addRating(new Rating(articleDTO.getUserRating(), articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())));
         }
 
         return ResponseEntity.ok().build();
     }
 
+    // home
     @GetMapping("/")
     public String home(Model model) {
         model.addAttribute("articles", articleService.getAllArticles());

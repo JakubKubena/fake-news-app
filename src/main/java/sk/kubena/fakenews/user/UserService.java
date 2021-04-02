@@ -34,8 +34,12 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
-    public User getUser(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
+    }
+
+    public User getUserByToken(String token) {
+        return userRepository.findByToken(token);
     }
 
     public void addUser(User user) {
