@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -55,7 +56,6 @@ public class AJAXController {
     // intercepts incoming user authentication requests
     @PostMapping(path = "/authenticate")
     public ResponseEntity<String> authenticateUser(@RequestBody UserDTO userDTO) {
-        LOGGER.info(userDTO.toString());
         if (userService.authenticateUser(userDTO) == null) {
             LOGGER.info("Attempted login: '{}' : '{}'", userDTO.getEmail(), userDTO.getPassword());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Wrong email or password!");
@@ -69,20 +69,26 @@ public class AJAXController {
     // intercepts incoming rating requests
     @PostMapping(path = "/request-ratings", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> ratingResponseEntity(@RequestBody ArticleDTO articleDTO) {
-        JSONObject responseJson;
-        if (userService.tokenExists(articleDTO.getToken())) {
+        // check for null
+        if(articleDTO == null) {
+            LOGGER.warn("Request body is null!");
+            return ResponseEntity.badRequest().build();
+        } else if(articleDTO.getUrl() == null || articleDTO.getTitle() == null || articleDTO.getToken() == null) {
+            LOGGER.warn("Null parameter in request body: {}", articleDTO.toString());
+            return ResponseEntity.badRequest().build();
+        // check if user is valid
+        } else if (userService.tokenExists(articleDTO.getToken())) {
             LOGGER.info("Requested ratings for article: {}", articleDTO.toString());
-            responseJson = new JSONObject();
-
+            JSONObject responseJson = new JSONObject();
+            // check if article already exists
             if (articleService.urlExists(articleDTO.getUrl())) {
                 Article existingArticle = articleService.getArticleByUrl(articleDTO.getUrl());
-                LOGGER.info("Found a record: {}", existingArticle);
-
                 responseJson.put("rating1", ratingService.getRatingCount(existingArticle, "true"));
                 responseJson.put("rating2", ratingService.getRatingCount(existingArticle, "false"));
                 responseJson.put("rating3", ratingService.getRatingCount(existingArticle, "misleading"));
                 responseJson.put("rating4", ratingService.getRatingCount(existingArticle, "unverified"));
                 LOGGER.info("Record of article found - sending ratings: {}", responseJson);
+            // if not, send 0 ratings
             } else {
                 responseJson.put("rating1", 0);
                 responseJson.put("rating2", 0);
@@ -90,12 +96,10 @@ public class AJAXController {
                 responseJson.put("rating4", 0);
                 LOGGER.info("No record of article found - sending 0 ratings: {}", responseJson);
             }
-
             return ResponseEntity.ok().header("Content-Type", "application/json").body(responseJson.toString());
         } else {
             LOGGER.warn("Token '{}' is invalid.", articleDTO.getToken());
-
-            return ResponseEntity.ok().build();
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -103,17 +107,41 @@ public class AJAXController {
     // intercepts incoming article requests
     @PostMapping(path = "/api", consumes = "application/json")
     public ResponseEntity<?> articleResponseEntity(@RequestBody ArticleDTO articleDTO) {
-        if (userService.tokenExists(articleDTO.getToken())) {
-            // add new article, if it doesnt exist yet
+        // check for null
+        if(articleDTO == null) {
+            LOGGER.warn("Request body is null!");
+            return ResponseEntity.badRequest().build();
+        } else if(articleDTO.getUrl() == null || articleDTO.getHostname() == null || articleDTO.getTitle() == null ||
+                articleDTO.getUserRating() == null || articleDTO.getContent() == null || articleDTO.getToken() == null) {
+            LOGGER.warn("Null parameter in request body: {}", articleDTO.toString());
+            return ResponseEntity.badRequest().build();
+        // check if user is valid
+        } else if (userService.tokenExists(articleDTO.getToken())) {
+            LOGGER.info("token {} is valid.", articleDTO.getToken());
+            LOGGER.info("Incoming article: {}", articleDTO.toString());
+            // check if article already exists
             if (!articleService.urlExists(articleDTO.getUrl())) {
+                // add new article
                 articleService.addArticle(articleDTO);
                 LOGGER.info("New article: {}", articleDTO.toString());
+                // add new rating
+                ratingService.addRating(new Rating(articleDTO.getUserRating(), articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())));
+                LOGGER.info("New rating: {}", ratingService.getRatingByArticleAndUser(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())).toString());
+                return ResponseEntity.ok().build();
+            // if article exists, check if rating exists
+            } else if(ratingService.ratingExists(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken()))) {
+                LOGGER.warn("Rating of {} by {} already exists!", articleDTO.toString(), userService.getUserByToken(articleDTO.getToken()).toString());
+                return ResponseEntity.badRequest().body("You already rated this article.");
+            // if not, add new rating
+            } else {
+                ratingService.addRating(new Rating(articleDTO.getUserRating(), articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())));
+                LOGGER.info("New rating: {}", ratingService.getRatingByArticleAndUser(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())).toString());
+                return ResponseEntity.ok().build();
             }
-            // add new rating for either existing or new article
-            ratingService.addRating(new Rating(articleDTO.getUserRating(), articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())));
+        } else {
+            LOGGER.warn("Token '{}' is invalid.", articleDTO.getToken());
+            return ResponseEntity.badRequest().build();
         }
-
-        return ResponseEntity.ok().build();
     }
 
     // home

@@ -3,6 +3,7 @@ package sk.kubena.fakenews.rating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sk.kubena.fakenews.article.Article;
+import sk.kubena.fakenews.user.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,12 @@ public class RatingService {
         return new ArrayList<>(ratingRepository.findAll());
     }
 
-    public Rating getRating(int id) {
+    public Rating getRatingById(int id) {
         return ratingRepository.findById(id).orElse(null);
+    }
+
+    public Rating getRatingByArticleAndUser(Article article, User user) {
+        return ratingRepository.findByArticleAndUser(article, user);
     }
 
     public void addRating(Rating rating) {
@@ -39,5 +44,9 @@ public class RatingService {
 
     public int getRatingCount(Article article, String value) {
         return ratingRepository.countByArticleAndValue(article, value);
+    }
+
+    public boolean ratingExists(Article article, User user) {
+        return ratingRepository.findByArticleAndUser(article, user) != null;
     }
 }

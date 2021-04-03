@@ -77,10 +77,13 @@ public class UserService {
     public String authenticateUser(UserDTO userDTO) {
         User user = userRepository.findByEmail(userDTO.getEmail());
         if (user == null) {
+            LOGGER.warn("User {} doesnt exist!", userDTO.getEmail());
             return null;
         } else if (passwordEncoder.matches(userDTO.getPassword(), user.getPassword())) {
+            LOGGER.info("Found user {} and returning token {}.", user.getEmail(), user.getToken());
             return user.getToken();
         } else {
+            LOGGER.warn("Wrong password!");
             return null;
         }
     }
