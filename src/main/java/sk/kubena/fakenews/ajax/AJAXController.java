@@ -167,4 +167,25 @@ public class AJAXController {
                 .contentType(MediaType.parseMediaType("application/csv"))
                 .body(file);
     }
+
+    @GetMapping("/ratings")
+    public String ratings(Model model) {
+        model.addAttribute("ratings", ratingService.getAllRatings());
+
+        return "views/ratings";
+    }
+
+    @GetMapping("/users")
+    public String users(Model model) {
+        model.addAttribute("users", userService.getAllUsers());
+
+        return "views/users";
+    }
+
+    @GetMapping("/article/{id}")
+    public String article(Model model, @PathVariable int id) {
+        model.addAttribute("article", articleService.getArticleById(id));
+
+        return "views/articleDetails";
+    }
 }

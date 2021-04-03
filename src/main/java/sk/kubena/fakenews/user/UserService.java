@@ -9,8 +9,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.kubena.fakenews.ajax.AJAXController;
 import sk.kubena.fakenews.error.UserAlreadyExistException;
+import sk.kubena.fakenews.rating.Rating;
 import sk.kubena.fakenews.role.RoleRepository;
 import sk.kubena.fakenews.ajax.TokenGenerator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Service
@@ -28,6 +32,10 @@ public class UserService {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public List<User> getAllUsers() {
+        return new ArrayList<>(userRepository.findAll());
     }
 
     public User getUser(int id) {
