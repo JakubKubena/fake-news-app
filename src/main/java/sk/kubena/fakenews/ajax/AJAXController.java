@@ -152,8 +152,8 @@ public class AJAXController {
         return "views/home";
     }
 
-    @GetMapping("/login")
-    public String login(Model model) {
+    @GetMapping(path = "/login")
+    public String login() {
         return "views/login";
     }
 
