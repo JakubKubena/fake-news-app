@@ -33,7 +33,7 @@ public class Article {
     @Column(name = "content", nullable = false)
     private String content;
 
-    @OneToMany(mappedBy="article")
+    @OneToMany(mappedBy="article", cascade = CascadeType.ALL)
     private Set<Rating> ratings;
 
     @CreationTimestamp

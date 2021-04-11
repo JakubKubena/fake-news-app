@@ -29,6 +29,15 @@ public class ArticleDTO {
     @NotEmpty
     private String token;
 
+    public ArticleDTO() {
+    }
+
+    public ArticleDTO(@NotNull @NotEmpty String url, @NotNull @NotEmpty String title, @NotNull @NotEmpty String token) {
+        this.url = url;
+        this.title = title;
+        this.token = token;
+    }
+
     public ArticleDTO(@NotNull @NotEmpty String url, @NotNull @NotEmpty String hostname, @NotNull @NotEmpty String title, @NotNull @NotEmpty String userRating, @NotNull @NotEmpty String content, @NotNull @NotEmpty String token) {
         this.url = url;
         this.hostname = hostname;

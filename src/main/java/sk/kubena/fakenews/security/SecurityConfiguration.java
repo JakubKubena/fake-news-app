@@ -40,22 +40,17 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-//        web.ignoring().antMatchers(/*"public/**", */"/authenticate", "/request-ratings", "/api", "/resources/**");
-        web.ignoring().antMatchers(/*"public/**", */"/authenticate", "/request-ratings", "/api", "/css/**", "/js/**");
-//        web.ignoring().antMatchers(/*"public/**", */"/authenticate", "/request-ratings", "/api", "/resources/**", "/static/**", "/css/**", "/js/**");
+        web.ignoring().antMatchers(/*"public/**", */"/authenticate", "/request-ratings", "/api", "/css/**", "/js/**", "/user/**");
     }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
 //                .csrf().disable()
-//                .csrf()
-//                    .ignoringAntMatchers("/authenticate", "/request-ratings", "/api")
-//                .and()
                 .authorizeRequests()
                     .antMatchers("/registration", "/user/registration")
                     .permitAll()
-                    .antMatchers("/", "/ratings", "/users")
+                    .antMatchers("/", "/ratings", "/users", "/article/**")
                     .authenticated()
                     .anyRequest()
                     .authenticated()

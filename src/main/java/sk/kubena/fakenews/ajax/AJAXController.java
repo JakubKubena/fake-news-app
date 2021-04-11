@@ -182,10 +182,45 @@ public class AJAXController {
         return "views/users";
     }
 
-    @GetMapping("/article/{id}")
-    public String article(Model model, @PathVariable int id) {
-        model.addAttribute("article", articleService.getArticleById(id));
+    @PostMapping(path = "/user", consumes = "application/json")
+    public ResponseEntity<String> changeAccountStatus(@RequestBody JSONObject requestObject) {
+//        JSONObject jsonObject = new JSONObject(requestObject.toString());
+        LOGGER.info(requestObject.toString());
+        LOGGER.info("{}, {}", requestObject.get("id"), requestObject.get("value"));
+//        if (userService.getUser(jsonObject.getInt("id")) == null) {
+//            LOGGER.info("User not found!");
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
+//        } else {
+//            if (Boolean.parseBoolean(value)) {
+//                LOGGER.info("User {} enabled!", id);
+//                userService.enableUser(Integer.parseInt(id), true);
+//                return ResponseEntity.ok().body("User enabled!");
+//            } else {
+//                LOGGER.info("User {} disabled!", id);
+//                userService.disableUser(Integer.parseInt(id), false);
+//                return ResponseEntity.ok().body("User disabled!");
+//            }
+//        }
+        return ResponseEntity.ok().body("User disabled!");
+    }
 
-        return "views/articleDetails";
+//    @GetMapping("/article/{id}")
+//    public String getArticle(Model model, @PathVariable int id) {
+//        model.addAttribute("article", articleService.getArticleById(id));
+//
+//        return "views/articleDetails";
+//    }
+
+//    @PostMapping(path = "/article/{id}")
+//    public void deleteArticle(@PathVariable int id) {
+//        articleService.deleteArticle(id);
+//    }
+
+    @PostMapping(path = "/article/{id}")
+    public String deleteArticle(Model model, @PathVariable int id) {
+        articleService.deleteArticle(id);
+        model.addAttribute("articles", articleService.getAllArticles());
+
+        return "views/home";
     }
 }

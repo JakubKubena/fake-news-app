@@ -6,17 +6,79 @@
     <!--    <meta name="viewport" content="width=device-width, initial-scale=1"/>-->
     <!--    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>-->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <title>Users</title>
+
+    <!--  jQuery & Datatables  -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+
+    <!--  Bootstrap css & js  -->
     <link type="text/css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script type="text/javascript" th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
+    <!--  Bootstrap icons  -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
 </head>
 <body>
-<div th:replace="fragments/header :: header">...</div>
+<div th:replace="fragments/header :: header"></div>
+
+<!-- Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="detailModalLabel">User detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <label class="form-label" for="idInput">ID:</label>
+                    <input class="form-control" type="text" id="idInput">
+                </div>
+                <div>
+                    <label class="form-label" for="emailInput">Email:</label>
+                    <input class="form-control" type="text" id="emailInput">
+                </div>
+                <div>
+                    <label class="form-label" for="enabledInput">Enabled:</label>
+                    <input class="form-control" type="text" id="enabledInput">
+                </div>
+                <div>
+                    <label class="form-label" for="tokenInput">Token:</label>
+                    <input class="form-control" type="text" id="tokenInput">
+                </div>
+                <div>
+                    <label class="form-label" for="roleInput">Role:</label>
+                    <input class="form-control" type="text" id="roleInput">
+                </div>
+                <div>
+                    <label class="form-label" for="createdInput">Created:</label>
+                    <input class="form-control" type="text" id="createdInput">
+                </div>
+                <div>
+                    <label class="form-label" for="updatedInput">Updated:</label>
+                    <input class="form-control" type="text" id="updatedInput">
+                </div>
+                <div>
+                    <button id="disable-user-button" type="button" class="btn btn-danger">Deactivate account</button>
+                    <button type="button" class="btn btn-primary">Promote to ADMIN role</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button id="user-form-submit" type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container-fluid">
     <div th:if="${users != null && !users.isEmpty()}">
-        <table class="table table-dark table-hover">
+        <table class="table table-dark table-hover" id="myTable">
+            <thead>
             <tr>
                 <th>ID</th>
                 <th>Email</th>
@@ -25,26 +87,76 @@
                 <th>Role</th>
                 <th>Created</th>
                 <th>Updated</th>
-                <!--                <th>Action</th>-->
+                <th>Action</th>
             </tr>
-            <tr th:each="user : ${users}">
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}" data-bs-toggle="modal" data-bs-target="#detailModal"
+                th:attr="data-id=''+${user.getId()}+'',
+                    data-email=''+${user.getEmail()}+'',
+                    data-enabled=''+${user.isEnabled()}+'',
+                    data-token=''+${user.getToken()}+'',
+                    data-role=''+${user.getRole().getName()}+'',
+                    data-created=''+${user.getCreatedAt()}+'',
+                    data-updated=''+${user.getUpdatedAt()}+''">
                 <td th:text="${user.getId()}"></td>
                 <td th:text="${user.getEmail()}"></td>
                 <td th:text="${user.isEnabled()}"></td>
                 <td th:text="${user.getToken()}"></td>
                 <td th:text="${user.getRole().getName()}"></td>
-                <!--                <td th:href="@{user.getRole().getName()}"></td>-->
                 <td th:text="${#dates.format(user.getCreatedAt(), 'dd-MM-yyyy HH:mm:ss')}"></td>
                 <td th:text="${#dates.format(user.getUpdatedAt(), 'dd-MM-yyyy HH:mm:ss')}"></td>
-                <!--                <td>-->
-                <!--                    <a th:href="@{'/home/view/' + ${article.getId()}}"><i class="fas fa-eye"></i></a>-->
-                <!--                    <a th:href="@{'/home/edit/' + ${article.getId()}}"><i class="fas fa-edit"></i></a>-->
-                <!--                    <a th:href="@{'/home/delete/' + ${article.getId()}}"><i class="fas fa-trash"></i></a>-->
-                <!--                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">modal</button>-->
-                <!--                </td>-->
+                <td>
+                    <!--                    <a th:href="@{'/user/' + ${user.getId()}}"><i class="bi bi-trash"></i></a>-->
+                    <!--                    <form th:action="@{'/user/' + ${user.getId()}}" th:method="post">-->
+                    <!--                        <button class="button-delete" type="submit" id="submitButton"><i class="bi bi-trash"></i></button>-->
+                    <!--                    </form>-->
+                </td>
             </tr>
+            </tbody>
         </table>
     </div>
 </div>
+<script>
+    $(document).ready( function () {
+        $('#myTable').DataTable();
+    } );
+
+    $('#detailModal').on('show.bs.modal', function (event) {
+        let $row = $(event.relatedTarget)
+        let $this = $(this)
+        $this.find('#idInput').val($row.data('id'))
+        $this.find('#emailInput').val($row.data('email'))
+        $this.find('#enabledInput').val($row.data('enabled'))
+        $this.find('#tokenInput').val($row.data('token'))
+        $this.find('#roleInput').val($row.data('role'))
+        $this.find('#createdInput').val($row.data('created'))
+        $this.find('#updatedInput').val($row.data('updated'))
+    })
+
+    $(function() {
+        $('#disable-user-button').on('click', function(e) {
+            let json = {
+                'id': $('#idInput').val(),
+                'value': 'false'
+            }
+            e.preventDefault();
+            $.ajax({
+                method: "POST",
+                url: 'user',
+                contentType: 'application/json',
+                data: JSON.stringify(json),
+                crossDomain: false,
+                success: function(response) {
+                    alert(response['response']);
+                },
+                error: function() {
+                    alert('Error');
+                }
+            });
+            return false;
+        });
+    });
+</script>
 </body>
 </html>

@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import sk.kubena.fakenews.ajax.AJAXController;
 import sk.kubena.fakenews.error.UserAlreadyExistException;
-import sk.kubena.fakenews.rating.Rating;
 import sk.kubena.fakenews.role.RoleRepository;
 import sk.kubena.fakenews.ajax.TokenGenerator;
 
@@ -103,4 +102,25 @@ public class UserService {
     public boolean tokenExists(String token) {
         return userRepository.findByToken(token) != null;
     }
+
+    public void disableUser(int id, boolean value) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            LOGGER.warn("User not found!");
+        } else {
+            user.setEnabled(value);
+            userRepository.save(user);
+        }
+    }
+
+    public void enableUser(int id, boolean value) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            LOGGER.warn("User not found!");
+        } else {
+            user.setEnabled(value);
+            userRepository.save(user);
+        }
+    }
+
 }
