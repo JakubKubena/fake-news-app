@@ -158,15 +158,21 @@ public class AJAXController {
     }
 
     @GetMapping("/export")
-    public ResponseEntity<Resource> getFile() {
-        String filename = "articles.csv";
-        InputStreamResource file = new InputStreamResource(articleService.load());
+    public String export() {
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
-                .contentType(MediaType.parseMediaType("application/csv"))
-                .body(file);
+        return "views/export";
     }
+
+//    @GetMapping("/export")
+//    public ResponseEntity<Resource> getFile() {
+//        String filename = "articles.csv";
+//        InputStreamResource file = new InputStreamResource(articleService.load());
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+//                .contentType(MediaType.parseMediaType("application/csv"))
+//                .body(file);
+//    }
 
     @GetMapping("/ratings")
     public String ratings(Model model) {
@@ -182,41 +188,31 @@ public class AJAXController {
         return "views/users";
     }
 
-    @PostMapping(path = "/user", consumes = "application/json")
-    public ResponseEntity<String> changeAccountStatus(@RequestBody JSONObject requestObject) {
-//        JSONObject jsonObject = new JSONObject(requestObject.toString());
-        LOGGER.info(requestObject.toString());
-        LOGGER.info("{}, {}", requestObject.get("id"), requestObject.get("value"));
-//        if (userService.getUser(jsonObject.getInt("id")) == null) {
-//            LOGGER.info("User not found!");
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
-//        } else {
-//            if (Boolean.parseBoolean(value)) {
-//                LOGGER.info("User {} enabled!", id);
-//                userService.enableUser(Integer.parseInt(id), true);
-//                return ResponseEntity.ok().body("User enabled!");
-//            } else {
-//                LOGGER.info("User {} disabled!", id);
-//                userService.disableUser(Integer.parseInt(id), false);
-//                return ResponseEntity.ok().body("User disabled!");
-//            }
-//        }
-        return ResponseEntity.ok().body("User disabled!");
+    @PutMapping(path = "/users", consumes = "application/json")
+    public ResponseEntity<String> changeAccountStatus(@RequestBody String request) {
+        if (request == null || request.isEmpty()) {
+            LOGGER.info("Invalid request: {}", request);
+            return ResponseEntity.badRequest().body("Invalid request!");
+        } else {
+            JSONObject jsonObject = new JSONObject(request);
+            int id = Integer.parseInt(jsonObject.get("id").toString());
+            boolean value = Boolean.parseBoolean(jsonObject.get("value").toString());
+            if (userService.getUser(id) == null) {
+                LOGGER.info("User not found!");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
+            } else if (value) {
+                LOGGER.info("User {} enabled!", id);
+                userService.changeEnabledValue(id, true);
+                return ResponseEntity.ok().body("User enabled!");
+            } else {
+                LOGGER.info("User {} disabled!", id);
+                userService.changeEnabledValue(id, false);
+                return ResponseEntity.ok().body("User disabled!");
+            }
+        }
     }
 
-//    @GetMapping("/article/{id}")
-//    public String getArticle(Model model, @PathVariable int id) {
-//        model.addAttribute("article", articleService.getArticleById(id));
-//
-//        return "views/articleDetails";
-//    }
-
-//    @PostMapping(path = "/article/{id}")
-//    public void deleteArticle(@PathVariable int id) {
-//        articleService.deleteArticle(id);
-//    }
-
-    @PostMapping(path = "/article/{id}")
+    @PostMapping(path = "/articles/{id}")
     public String deleteArticle(Model model, @PathVariable int id) {
         articleService.deleteArticle(id);
         model.addAttribute("articles", articleService.getAllArticles());

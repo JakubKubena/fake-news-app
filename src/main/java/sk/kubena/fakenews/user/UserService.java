@@ -103,7 +103,7 @@ public class UserService {
         return userRepository.findByToken(token) != null;
     }
 
-    public void disableUser(int id, boolean value) {
+    public void changeEnabledValue(int id, boolean value) {
         User user = userRepository.findById(id).orElse(null);
         if (user == null) {
             LOGGER.warn("User not found!");
@@ -112,15 +112,4 @@ public class UserService {
             userRepository.save(user);
         }
     }
-
-    public void enableUser(int id, boolean value) {
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null) {
-            LOGGER.warn("User not found!");
-        } else {
-            user.setEnabled(value);
-            userRepository.save(user);
-        }
-    }
-
 }

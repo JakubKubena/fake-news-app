@@ -6,7 +6,8 @@
     <!--    <meta name="viewport" content="width=device-width, initial-scale=1"/>-->
     <!--    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>-->
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <meta th:name="_csrf" th:content="${_csrf.token}"/>
+    <meta th:name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Users</title>
 
     <!--  jQuery & Datatables  -->
@@ -21,6 +22,9 @@
 
     <!--  Bootstrap icons  -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
+    <style>
+        .top-buffer { margin-top:20px; }
+    </style>
 </head>
 <body>
 <div th:replace="fragments/header :: header"></div>
@@ -34,42 +38,51 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div>
-                    <label class="form-label" for="idInput">ID:</label>
-                    <input class="form-control" type="text" id="idInput">
+                <div class="row row-cols-3">
+                    <div class="col">
+                        <label class="form-label" for="idInput">ID:</label>
+                        <input class="form-control" type="text" id="idInput" disabled>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="emailInput">Email:</label>
+                        <input class="form-control" type="text" id="emailInput" disabled>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="roleInput">Role:</label>
+                        <input class="form-control" type="text" id="roleInput" disabled>
+                    </div>
                 </div>
-                <div>
-                    <label class="form-label" for="emailInput">Email:</label>
-                    <input class="form-control" type="text" id="emailInput">
+                <div class="row row-cols-2">
+                    <div class="col">
+                        <label class="form-label" for="enabledInput">Enabled:</label>
+                        <input class="form-control" type="text" id="enabledInput" disabled>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="tokenInput">Token:</label>
+                        <input class="form-control" type="text" id="tokenInput" disabled>
+                    </div>
                 </div>
-                <div>
-                    <label class="form-label" for="enabledInput">Enabled:</label>
-                    <input class="form-control" type="text" id="enabledInput">
+                <div class="row row-cols-2">
+                    <div class="col">
+                        <label class="form-label" for="createdInput">Created:</label>
+                        <input class="form-control" type="text" id="createdInput" disabled>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="updatedInput">Updated:</label>
+                        <input class="form-control" type="text" id="updatedInput" disabled>
+                    </div>
                 </div>
-                <div>
-                    <label class="form-label" for="tokenInput">Token:</label>
-                    <input class="form-control" type="text" id="tokenInput">
-                </div>
-                <div>
-                    <label class="form-label" for="roleInput">Role:</label>
-                    <input class="form-control" type="text" id="roleInput">
-                </div>
-                <div>
-                    <label class="form-label" for="createdInput">Created:</label>
-                    <input class="form-control" type="text" id="createdInput">
-                </div>
-                <div>
-                    <label class="form-label" for="updatedInput">Updated:</label>
-                    <input class="form-control" type="text" id="updatedInput">
-                </div>
-                <div>
-                    <button id="disable-user-button" type="button" class="btn btn-danger">Deactivate account</button>
-                    <button type="button" class="btn btn-primary">Promote to ADMIN role</button>
+                <div class="row row-cols-8 top-buffer">
+                    <div class="col-3">
+                        <button id="enabled-user-button" type="button" class="btn btn-danger"></button>
+                    </div>
+                    <div class="col-3">
+                        <button type="button" class="btn btn-primary">Promote to ADMIN</button>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button id="user-form-submit" type="submit" class="btn btn-primary">Save changes</button>
             </div>
         </div>
     </div>
@@ -87,7 +100,7 @@
                 <th>Role</th>
                 <th>Created</th>
                 <th>Updated</th>
-                <th>Action</th>
+<!--                <th>Action</th>-->
             </tr>
             </thead>
             <tbody>
@@ -106,12 +119,12 @@
                 <td th:text="${user.getRole().getName()}"></td>
                 <td th:text="${#dates.format(user.getCreatedAt(), 'dd-MM-yyyy HH:mm:ss')}"></td>
                 <td th:text="${#dates.format(user.getUpdatedAt(), 'dd-MM-yyyy HH:mm:ss')}"></td>
-                <td>
-                    <!--                    <a th:href="@{'/user/' + ${user.getId()}}"><i class="bi bi-trash"></i></a>-->
-                    <!--                    <form th:action="@{'/user/' + ${user.getId()}}" th:method="post">-->
-                    <!--                        <button class="button-delete" type="submit" id="submitButton"><i class="bi bi-trash"></i></button>-->
-                    <!--                    </form>-->
-                </td>
+<!--                <td>-->
+<!--                    &lt;!&ndash;                    <a th:href="@{'/user/' + ${user.getId()}}"><i class="bi bi-trash"></i></a>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <form th:action="@{'/user/' + ${user.getId()}}" th:method="post">&ndash;&gt;-->
+<!--                    &lt;!&ndash;                        <button class="button-delete" type="submit" id="submitButton"><i class="bi bi-trash"></i></button>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    </form>&ndash;&gt;-->
+<!--                </td>-->
             </tr>
             </tbody>
         </table>
@@ -132,21 +145,35 @@
         $this.find('#roleInput').val($row.data('role'))
         $this.find('#createdInput').val($row.data('created'))
         $this.find('#updatedInput').val($row.data('updated'))
+
+        let enabledButton = $('#enabled-user-button')
+        if($('#enabledInput').val() === 'false') {
+            enabledButton.removeClass('btn btn-danger').addClass('btn btn-success');
+            enabledButton.html('Enable account');
+        } else {
+            enabledButton.removeClass('btn btn-success').addClass('btn btn-danger');
+            enabledButton.html('Disable account');
+        }
     })
 
     $(function() {
-        $('#disable-user-button').on('click', function(e) {
-            let json = {
-                'id': $('#idInput').val(),
-                'value': 'false'
-            }
+        $('#enabled-user-button').on('click', function(e) {
+            let token = $("meta[name='_csrf']").attr("content");
+            let header = $("meta[name='_csrf_header']").attr("content");
+            let enabledValue = ($('#enabledInput').val() === 'true');
+            let json = JSON.stringify({
+                id: $('#idInput').val(),
+                value: !enabledValue
+            })
             e.preventDefault();
             $.ajax({
-                method: "POST",
-                url: 'user',
+                method: 'PUT',
+                url: 'users',
                 contentType: 'application/json',
-                data: JSON.stringify(json),
-                crossDomain: false,
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader(header, token);
+                },
+                data: json,
                 success: function(response) {
                     alert(response['response']);
                 },
