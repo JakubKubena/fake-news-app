@@ -1,5 +1,11 @@
 package sk.kubena.fakenews.ajax;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.QuoteMode;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,18 +16,34 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import org.supercsv.io.CsvBeanWriter;
+import org.supercsv.io.ICsvBeanWriter;
+import org.supercsv.prefs.CsvPreference;
+import org.supercsv.quote.AlwaysQuoteMode;
 import sk.kubena.fakenews.article.Article;
 import sk.kubena.fakenews.article.ArticleDTO;
 import sk.kubena.fakenews.article.ArticleService;
+import sk.kubena.fakenews.export.ExcelExport;
 import sk.kubena.fakenews.rating.Rating;
 import sk.kubena.fakenews.rating.RatingService;
 import sk.kubena.fakenews.user.UserDTO;
 import sk.kubena.fakenews.user.UserService;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 @Controller
 public class AJAXController {
@@ -162,6 +184,168 @@ public class AJAXController {
 
         return "views/export";
     }
+
+//    @GetMapping("/export/excel")
+//    public ResponseEntity<Workbook> exportToExcel() throws IOException {
+//        Workbook workbook = new XSSFWorkbook();
+//
+//        Sheet sheet = workbook.createSheet("Articles");
+//        sheet.setColumnWidth(0, 6000);
+//        sheet.setColumnWidth(1, 4000);
+//
+//        Row header = sheet.createRow(0);
+//
+//        CellStyle headerStyle = workbook.createCellStyle();
+//        headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
+//        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+//
+//        XSSFFont font = ((XSSFWorkbook) workbook).createFont();
+//        font.setFontName("Arial");
+//        font.setFontHeightInPoints((short) 16);
+//        font.setBold(true);
+//        headerStyle.setFont(font);
+//
+//        Cell headerCell = header.createCell(0);
+//        headerCell.setCellValue("Name");
+//        headerCell.setCellStyle(headerStyle);
+//
+//        headerCell = header.createCell(1);
+//        headerCell.setCellValue("Age");
+//        headerCell.setCellStyle(headerStyle);
+//
+//        CellStyle style = workbook.createCellStyle();
+//        style.setWrapText(true);
+//
+//        Row row = sheet.createRow(2);
+//        Cell cell = row.createCell(0);
+//        cell.setCellValue("John Smith");
+//        cell.setCellStyle(style);
+//
+//        cell = row.createCell(1);
+//        cell.setCellValue(20);
+//        cell.setCellStyle(style);
+//
+//        File currDir = new File(".");
+//        String path = currDir.getAbsolutePath();
+//        String fileLocation = path.substring(0, path.length() - 1) + "temp.xlsx";
+//
+//        FileOutputStream outputStream = new FileOutputStream(fileLocation);
+//        workbook.write(outputStream);
+//        workbook.close();
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + "temp.xlsx")
+//                .contentType(MediaType.parseMediaType("application/octet-stream"))
+//                .body(workbook);
+//    }
+
+    @GetMapping("/export/file")
+    public void exportToExcel(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+        String fileName = request.getParameter("filename");
+        String fileType = request.getParameter("filetype");
+
+        if (fileType.equals("xlsx")) {
+            String headerKey = "Content-Disposition";
+            String headerValue = "attachment; filename=" + fileName + "." + fileType;
+            response.setHeader(headerKey, headerValue);
+            response.setContentType("application/octet-stream");
+
+            List<Article> listArticles = articleService.getAllArticles();
+
+            ExcelExport excelExport = new ExcelExport(listArticles);
+
+            excelExport.export(response);
+        } else if (fileType.equals("csv")) {
+//            String headerKey = "Content-Disposition";
+//            String headerValue = "attachment; filename=" + fileName + "." + fileType;
+//            response.setHeader(headerKey, headerValue);
+//            response.setContentType("text/csv");
+//
+//            List<Article> listArticles = articleService.getAllArticles();
+//
+//            CsvPreference prefs = new CsvPreference.Builder('"',';',"\n")
+//                    .useQuoteMode(new AlwaysQuoteMode()).build();
+//
+//            ICsvBeanWriter csvWriter = new CsvBeanWriter(response.getWriter(), prefs);
+//            String[] csvHeader = {"id", "hostname", "url", "title", "content", "createdAt"};
+//            String[] nameMapping = {"id", "hostname", "url", "title", "content", "createdAt"};
+//
+//            csvWriter.writeHeader(csvHeader);
+//
+//            for (Article article : listArticles) {
+//                csvWriter.write(article, nameMapping);
+//            }
+//
+//            csvWriter.close();
+
+            List<Article> articles = articleService.getAllArticles();
+            CSVPrinter csvPrinter = null;
+            try {
+                String headerKey = "Content-Disposition";
+                String headerValue = "attachment; filename=" + fileName + "." + fileType;
+                response.setHeader(headerKey, headerValue);
+                response.setContentType("text/csv");
+
+                final String[] HEADERS = { "id", "hostname", "url", "title", "content", "true", "false", "misleading", "unverified", "createdAt"};
+                final CSVFormat format = CSVFormat.TDF.withHeader(HEADERS).withQuoteMode(QuoteMode.MINIMAL);
+
+                csvPrinter = new CSVPrinter(response.getWriter(), format);
+
+                for (Article article : articles) {
+                    List<String> data = Arrays.asList(
+                            String.valueOf(article.getId()),
+                            article.getHostname(),
+                            article.getUrl(),
+                            article.getTitle(),
+                            article.getContent().replaceAll("[\\n\\t]", ""),
+                            String.valueOf(ratingService.getRatingCount(article, "true")),
+                            String.valueOf(ratingService.getRatingCount(article, "false")),
+                            String.valueOf(ratingService.getRatingCount(article, "misleading")),
+                            String.valueOf(ratingService.getRatingCount(article, "unverified")),
+                            String.valueOf(article.getCreatedAt())
+                    );
+                    csvPrinter.printRecord(data);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if(csvPrinter != null)
+                    csvPrinter.close();
+            }
+        }
+    }
+
+//    @GetMapping("/export/excel")
+//    public void exportToExcel(HttpServletRequest request, HttpServletResponse response) throws IOException {
+//        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+//        String currentDateTime = dateFormatter.format(new Date());
+//        String fileName = request.getParameter("filename");
+//        String fileType = request.getParameter("filetype");
+//
+//        String headerKey = "Content-Disposition";
+//        String headerValue = "attachment; filename=" + fileName + "." + fileType;
+//        response.setHeader(headerKey, headerValue);
+//        response.setContentType("application/octet-stream");
+//
+//        List<Article> listArticles = articleService.getAllArticles();
+//
+//        ExcelExport excelExport = new ExcelExport(listArticles);
+//
+//        excelExport.export(response);
+//        }
+//
+//    @GetMapping("/export/csv")
+//    public ResponseEntity<Resource> exportToCSV() {
+//        String filename = "articles.csv";
+//        InputStreamResource file = new InputStreamResource(articleService.load());
+//
+//        return ResponseEntity.ok()
+//                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+//                .contentType(MediaType.parseMediaType("application/csv"))
+//                .body(file);
+//    }
 
 //    @GetMapping("/export")
 //    public ResponseEntity<Resource> getFile() {
