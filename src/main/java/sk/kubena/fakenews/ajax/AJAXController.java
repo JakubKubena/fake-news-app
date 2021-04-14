@@ -7,6 +7,8 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
+import org.owasp.html.HtmlPolicyBuilder;
+import org.owasp.html.PolicyFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,6 +145,14 @@ public class AJAXController {
             LOGGER.info("Incoming article: {}", articleDTO.toString());
             // check if article already exists
             if (!articleService.urlExists(articleDTO.getUrl())) {
+//                PolicyFactory policy = new HtmlPolicyBuilder()
+//                        .allowElements("a")
+//                        .allowUrlProtocols("https")
+//                        .allowAttributes("href").onElements("a")
+//                        .requireRelNofollowOnLinks()
+//                        .toFactory();
+//                articleDTO.setContent(policy.sanitize(articleDTO.getContent()));
+
                 // add new article
                 articleService.addArticle(articleDTO);
                 LOGGER.info("New article: {}", articleDTO.toString());
@@ -289,7 +299,11 @@ public class AJAXController {
                 response.setContentType("text/csv");
 
                 final String[] HEADERS = { "id", "hostname", "url", "title", "content", "true", "false", "misleading", "unverified", "createdAt"};
-                final CSVFormat format = CSVFormat.TDF.withHeader(HEADERS).withQuoteMode(QuoteMode.MINIMAL);
+                final CSVFormat format = CSVFormat.TDF
+                        .withHeader(HEADERS)
+                        .withQuoteMode(QuoteMode.ALL)
+                        .withEscape('\\')
+                        .withRecordSeparator('\n');
 
                 csvPrinter = new CSVPrinter(response.getWriter(), format);
 
@@ -299,7 +313,7 @@ public class AJAXController {
                             article.getHostname(),
                             article.getUrl(),
                             article.getTitle(),
-                            article.getContent().replaceAll("[\\n\\t]", ""),
+                            article.getContent().replaceAll("[\\t]", ""),
                             String.valueOf(ratingService.getRatingCount(article, "true")),
                             String.valueOf(ratingService.getRatingCount(article, "false")),
                             String.valueOf(ratingService.getRatingCount(article, "misleading")),

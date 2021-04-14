@@ -169,6 +169,13 @@
 			<version>2.4.0</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/com.googlecode.owasp-java-html-sanitizer/owasp-java-html-sanitizer -->
+		<dependency>
+			<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
+			<artifactId>owasp-java-html-sanitizer</artifactId>
+			<version>20200713.1</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
