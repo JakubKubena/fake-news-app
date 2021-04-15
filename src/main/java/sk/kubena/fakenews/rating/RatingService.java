@@ -34,7 +34,7 @@ public class RatingService {
         ratingRepository.save(rating);
     }
 
-    public void updateRating(int id, Rating rating) {
+    public void updateRating(Rating rating) {
         ratingRepository.save(rating);
     }
 

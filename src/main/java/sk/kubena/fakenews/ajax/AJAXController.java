@@ -32,6 +32,7 @@ import sk.kubena.fakenews.article.ArticleService;
 import sk.kubena.fakenews.export.ExcelExport;
 import sk.kubena.fakenews.rating.Rating;
 import sk.kubena.fakenews.rating.RatingService;
+import sk.kubena.fakenews.user.User;
 import sk.kubena.fakenews.user.UserDTO;
 import sk.kubena.fakenews.user.UserService;
 
@@ -63,6 +64,54 @@ public class AJAXController {
         this.userService = userService;
     }
 
+    @GetMapping(path = "/login")
+    public String login() {
+        return "views/login";
+    }
+
+    @GetMapping("/success")
+    public void loginPageRedirect(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
+
+        if(request.isUserInRole("ROLE_ADMIN")) {
+            response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/home"));
+        } else if(request.isUserInRole("ROLE_USER")){
+            response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/profile"));
+        }
+    }
+
+    // home
+    @GetMapping("/home")
+    public String home(Model model) {
+        model.addAttribute("articles", articleService.getAllArticles());
+
+        return "views/home";
+    }
+
+    @GetMapping("/profile")
+    public String user() {
+
+        return "views/user";
+    }
+
+    @GetMapping("/export")
+    public String export() {
+
+        return "views/export";
+    }
+
+    // TODO: 14/04/2021 if we want to create users inside the app
+//    @PostMapping(path = "/user")
+//    public ResponseEntity<String> addUser(@RequestBody UserDTO userDTO) {
+//        if (userDTO == null) {
+//            LOGGER.info("Request body is null!");
+//            return ResponseEntity.badRequest().body("Null request!");
+//        } else {
+//            userService.addUser(userDTO);
+//            LOGGER.info("User '{}' has been successfully created.", userDTO.getEmail());
+//            return ResponseEntity.ok(userService.authenticateUser(userDTO));
+//        }
+//    }
+
     // TODO: 31/03/2021 handle extension uninstallation
 //    @GetMapping(path = "/uninstalled/{tokenString}")
 //    public ResponseEntity<?> uninstalledResponseEntity(@PathVariable String tokenString) {
@@ -93,34 +142,55 @@ public class AJAXController {
     // intercepts incoming rating requests
     @PostMapping(path = "/request-ratings", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> ratingResponseEntity(@RequestBody ArticleDTO articleDTO) {
-        // check for null
+
+        // check if the request body is null
         if(articleDTO == null) {
             LOGGER.warn("Request body is null!");
             return ResponseEntity.badRequest().build();
+
+        // check if the request body parameters are null
         } else if(articleDTO.getUrl() == null || articleDTO.getTitle() == null || articleDTO.getToken() == null) {
             LOGGER.warn("Null parameter in request body: {}", articleDTO.toString());
             return ResponseEntity.badRequest().build();
-        // check if user is valid
+
+        // check if the user token is valid
         } else if (userService.tokenExists(articleDTO.getToken())) {
             LOGGER.info("Requested ratings for article: {}", articleDTO.toString());
+            Article existingArticle = articleService.getArticleByUrl(articleDTO.getUrl());
             JSONObject responseJson = new JSONObject();
-            // check if article already exists
-            if (articleService.urlExists(articleDTO.getUrl())) {
-                Article existingArticle = articleService.getArticleByUrl(articleDTO.getUrl());
-                responseJson.put("rating1", ratingService.getRatingCount(existingArticle, "true"));
-                responseJson.put("rating2", ratingService.getRatingCount(existingArticle, "false"));
-                responseJson.put("rating3", ratingService.getRatingCount(existingArticle, "misleading"));
-                responseJson.put("rating4", ratingService.getRatingCount(existingArticle, "unverified"));
-                LOGGER.info("Record of article found - sending ratings: {}", responseJson);
-            // if not, send 0 ratings
-            } else {
+
+            // check if the article does not exist
+            if (!articleService.urlExists(articleDTO.getUrl())) {
+                // return 0 ratings
                 responseJson.put("rating1", 0);
                 responseJson.put("rating2", 0);
                 responseJson.put("rating3", 0);
                 responseJson.put("rating4", 0);
-                LOGGER.info("No record of article found - sending 0 ratings: {}", responseJson);
+                responseJson.put("userRating", "null");
+                LOGGER.info("No record of article found - sending 0 ratings.");
+
+            // if the article does exist, then check if the rating of that article by that user does also exist
+            } else if(ratingService.ratingExists(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken()))) {
+                // sending the article ratings along with the article rating by that user
+                responseJson.put("rating1", ratingService.getRatingCount(existingArticle, "true"));
+                responseJson.put("rating2", ratingService.getRatingCount(existingArticle, "false"));
+                responseJson.put("rating3", ratingService.getRatingCount(existingArticle, "misleading"));
+                responseJson.put("rating4", ratingService.getRatingCount(existingArticle, "unverified"));
+                responseJson.put("userRating", ratingService.getRatingByArticleAndUser(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())).getValue());
+                LOGGER.warn("Rating of {} by {} found - sending ratings: {}", articleDTO.toString(), userService.getUserByToken(articleDTO.getToken()).toString(), responseJson);
+
+            // if the article rating by that user does not exist, add new rating
+            } else {
+                responseJson.put("rating1", ratingService.getRatingCount(existingArticle, "true"));
+                responseJson.put("rating2", ratingService.getRatingCount(existingArticle, "false"));
+                responseJson.put("rating3", ratingService.getRatingCount(existingArticle, "misleading"));
+                responseJson.put("rating4", ratingService.getRatingCount(existingArticle, "unverified"));
+                responseJson.put("userRating", "null");
+                LOGGER.info("Record of article found - sending ratings: {}", responseJson);
             }
             return ResponseEntity.ok().header("Content-Type", "application/json").body(responseJson.toString());
+
+        // if user token is not valid
         } else {
             LOGGER.warn("Token '{}' is invalid.", articleDTO.getToken());
             return ResponseEntity.badRequest().build();
@@ -128,71 +198,56 @@ public class AJAXController {
     }
 
     // TODO: 01/04/2021 check if rating value is 1 of the 4
-    // intercepts incoming article requests
+    // intercepts the incoming article requests
     @PostMapping(path = "/api", consumes = "application/json")
     public ResponseEntity<?> articleResponseEntity(@RequestBody ArticleDTO articleDTO) {
-        // check for null
+        // check if the request body is null
         if(articleDTO == null) {
             LOGGER.warn("Request body is null!");
             return ResponseEntity.badRequest().build();
+
+        // check if the request body parameters are null
         } else if(articleDTO.getUrl() == null || articleDTO.getHostname() == null || articleDTO.getTitle() == null ||
                 articleDTO.getUserRating() == null || articleDTO.getContent() == null || articleDTO.getToken() == null) {
             LOGGER.warn("Null parameter in request body: {}", articleDTO.toString());
             return ResponseEntity.badRequest().build();
-        // check if user is valid
+
+        // check if the user token is valid
         } else if (userService.tokenExists(articleDTO.getToken())) {
             LOGGER.info("token {} is valid.", articleDTO.getToken());
             LOGGER.info("Incoming article: {}", articleDTO.toString());
-            // check if article already exists
-            if (!articleService.urlExists(articleDTO.getUrl())) {
-//                PolicyFactory policy = new HtmlPolicyBuilder()
-//                        .allowElements("a")
-//                        .allowUrlProtocols("https")
-//                        .allowAttributes("href").onElements("a")
-//                        .requireRelNofollowOnLinks()
-//                        .toFactory();
-//                articleDTO.setContent(policy.sanitize(articleDTO.getContent()));
 
+            // check if the article does not exist
+            if (!articleService.urlExists(articleDTO.getUrl())) {
                 // add new article
                 articleService.addArticle(articleDTO);
                 LOGGER.info("New article: {}", articleDTO.toString());
+
                 // add new rating
                 ratingService.addRating(new Rating(articleDTO.getUserRating(), articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())));
                 LOGGER.info("New rating: {}", ratingService.getRatingByArticleAndUser(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())).toString());
                 return ResponseEntity.ok().build();
-            // if article exists, check if rating exists
+
+            // if the article does exist, then check if the rating of that article by that user does also exist
             } else if(ratingService.ratingExists(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken()))) {
-                LOGGER.warn("Rating of {} by {} already exists!", articleDTO.toString(), userService.getUserByToken(articleDTO.getToken()).toString());
-                return ResponseEntity.badRequest().body("You already rated this article.");
-            // if not, add new rating
+                LOGGER.warn("Rating of {} by {} already exists.", articleDTO.toString(), userService.getUserByToken(articleDTO.getToken()).toString());
+                Rating rating = ratingService.getRatingByArticleAndUser(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken()));
+                rating.setValue(articleDTO.getUserRating());
+                ratingService.updateRating(rating);
+                return ResponseEntity.ok().build();
+
+            // if the article rating by that user does not exist, add new rating
             } else {
                 ratingService.addRating(new Rating(articleDTO.getUserRating(), articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())));
                 LOGGER.info("New rating: {}", ratingService.getRatingByArticleAndUser(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())).toString());
                 return ResponseEntity.ok().build();
             }
+
+        // if user token is not valid
         } else {
             LOGGER.warn("Token '{}' is invalid.", articleDTO.getToken());
             return ResponseEntity.badRequest().build();
         }
-    }
-
-    // home
-    @GetMapping("/")
-    public String home(Model model) {
-        model.addAttribute("articles", articleService.getAllArticles());
-
-        return "views/home";
-    }
-
-    @GetMapping(path = "/login")
-    public String login() {
-        return "views/login";
-    }
-
-    @GetMapping("/export")
-    public String export() {
-
-        return "views/export";
     }
 
 //    @GetMapping("/export/excel")
@@ -386,26 +441,71 @@ public class AJAXController {
         return "views/users";
     }
 
-    @PutMapping(path = "/users", consumes = "application/json")
+    @PutMapping(path = "/users/enabled", consumes = "application/json")
     public ResponseEntity<String> changeAccountStatus(@RequestBody String request) {
+
         if (request == null || request.isEmpty()) {
             LOGGER.info("Invalid request: {}", request);
             return ResponseEntity.badRequest().body("Invalid request!");
+
         } else {
             JSONObject jsonObject = new JSONObject(request);
             int id = Integer.parseInt(jsonObject.get("id").toString());
             boolean value = Boolean.parseBoolean(jsonObject.get("value").toString());
+
             if (userService.getUser(id) == null) {
                 LOGGER.info("User not found!");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
+
             } else if (value) {
                 LOGGER.info("User {} enabled!", id);
                 userService.changeEnabledValue(id, true);
                 return ResponseEntity.ok().body("User enabled!");
+
             } else {
                 LOGGER.info("User {} disabled!", id);
                 userService.changeEnabledValue(id, false);
                 return ResponseEntity.ok().body("User disabled!");
+            }
+        }
+    }
+
+    @PutMapping(path = "/users/role", consumes = "application/json")
+    public ResponseEntity<String> changeAccountRole(@RequestBody String request) {
+
+        // check if request is null
+        if (request == null || request.isEmpty()) {
+            LOGGER.info("Invalid request: {}", request);
+            return ResponseEntity.badRequest().body("Invalid request!");
+
+        // if request is not null
+        } else {
+            JSONObject jsonObject = new JSONObject(request);
+            int id = Integer.parseInt(jsonObject.get("id").toString());
+            String role = jsonObject.get("role").toString();
+            LOGGER.info("{} {}", id, role); 
+
+            // check if user does not exist
+            if (userService.getUser(id) == null) {
+                LOGGER.info("User not found!");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found!");
+
+            // if role is USER, change it to ADMIN
+            } else if (role.equals("ROLE_USER")) {
+                userService.changeRole(id, "ROLE_ADMIN");
+                LOGGER.info("User {} promoted to ADMIN!", id);
+                return ResponseEntity.ok().body("User promoted!");
+
+            // if role is ADMIN, change it to USER
+            } else if (role.equals("ROLE_ADMIN")) {
+                userService.changeRole(id, "ROLE_USER");
+                LOGGER.info("User {} demoted to USER!", id);
+                return ResponseEntity.ok().body("User demoted!");
+
+            // invalid role
+            } else {
+                LOGGER.info("Invalid role: {}", role);
+                return ResponseEntity.badRequest().body("Invalid role!");
             }
         }
     }

@@ -49,9 +49,21 @@ public class UserService {
         return userRepository.findByToken(token);
     }
 
-    public void addUser(User user) {
-        userRepository.save(user);
-    }
+    // TODO: 14/04/2021 if we want to create users inside the app
+//    public void addUser(UserDTO userDTO) throws UserAlreadyExistException {
+//        if (emailExists(userDTO.getEmail())) {
+//            throw new UserAlreadyExistException("There is an account with that email address: " + userDTO.getEmail());
+//        }
+//
+//        User user = new User();
+//        user.setPassword(userDTO.getPassword());
+//        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+//        user.setEmail(userDTO.getEmail());
+//        user.setEnabled(true);
+//        user.setToken(TokenGenerator.generateType1UUID().toString());
+//        user.setRole(roleRepository.findRoleByName("ROLE_ADMIN"));
+//        userRepository.save(user);
+//    }
 
     public void updateUser(int id, User user) {
         userRepository.save(user);
@@ -63,9 +75,7 @@ public class UserService {
 
     @Transactional
 //    @Override
-    public User registerNewUserAccount(UserDTO userDTO)
-            throws UserAlreadyExistException {
-
+    public User registerNewUserAccount(UserDTO userDTO) throws UserAlreadyExistException {
         if (emailExists(userDTO.getEmail())) {
             throw new UserAlreadyExistException("There is an account with that email address: " + userDTO.getEmail());
         }
@@ -76,8 +86,7 @@ public class UserService {
         user.setEmail(userDTO.getEmail());
         user.setEnabled(true);
         user.setToken(TokenGenerator.generateType1UUID().toString());
-        user.setRole(roleRepository.findRoleByName("ADMIN"));
-//        user.setRole(Arrays.asList("ROLE_USER"));
+        user.setRole(roleRepository.findRoleByName("ROLE_USER"));
         return userRepository.save(user);
     }
 
@@ -109,6 +118,16 @@ public class UserService {
             LOGGER.warn("User not found!");
         } else {
             user.setEnabled(value);
+            userRepository.save(user);
+        }
+    }
+
+    public void changeRole(int id, String role) {
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null) {
+            LOGGER.warn("User not found!");
+        } else {
+            user.setRole(roleRepository.findRoleByName(role));
             userRepository.save(user);
         }
     }

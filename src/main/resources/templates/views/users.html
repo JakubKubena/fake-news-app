@@ -40,36 +40,36 @@
             <div class="modal-body">
                 <div class="row row-cols-3">
                     <div class="col">
-                        <label class="form-label" for="idInput">ID:</label>
-                        <input class="form-control" type="text" id="idInput" disabled>
+                        <label class="form-label" for="idField">ID:</label>
+                        <input class="form-control" type="text" id="idField" disabled>
                     </div>
                     <div class="col">
-                        <label class="form-label" for="emailInput">Email:</label>
-                        <input class="form-control" type="text" id="emailInput" disabled>
+                        <label class="form-label" for="emailField">Email:</label>
+                        <input class="form-control" type="text" id="emailField" disabled>
                     </div>
                     <div class="col">
-                        <label class="form-label" for="roleInput">Role:</label>
-                        <input class="form-control" type="text" id="roleInput" disabled>
-                    </div>
-                </div>
-                <div class="row row-cols-2">
-                    <div class="col">
-                        <label class="form-label" for="enabledInput">Enabled:</label>
-                        <input class="form-control" type="text" id="enabledInput" disabled>
-                    </div>
-                    <div class="col">
-                        <label class="form-label" for="tokenInput">Token:</label>
-                        <input class="form-control" type="text" id="tokenInput" disabled>
+                        <label class="form-label" for="roleField">Role:</label>
+                        <input class="form-control" type="text" id="roleField" disabled>
                     </div>
                 </div>
                 <div class="row row-cols-2">
                     <div class="col">
-                        <label class="form-label" for="createdInput">Created:</label>
-                        <input class="form-control" type="text" id="createdInput" disabled>
+                        <label class="form-label" for="enabledField">Enabled:</label>
+                        <input class="form-control" type="text" id="enabledField" disabled>
                     </div>
                     <div class="col">
-                        <label class="form-label" for="updatedInput">Updated:</label>
-                        <input class="form-control" type="text" id="updatedInput" disabled>
+                        <label class="form-label" for="tokenField">Token:</label>
+                        <input class="form-control" type="text" id="tokenField" disabled>
+                    </div>
+                </div>
+                <div class="row row-cols-2">
+                    <div class="col">
+                        <label class="form-label" for="createdField">Created:</label>
+                        <input class="form-control" type="text" id="createdField" disabled>
+                    </div>
+                    <div class="col">
+                        <label class="form-label" for="updatedField">Updated:</label>
+                        <input class="form-control" type="text" id="updatedField" disabled>
                     </div>
                 </div>
                 <div class="row row-cols-8 top-buffer">
@@ -77,9 +77,39 @@
                         <button id="enabled-user-button" type="button" class="btn btn-danger"></button>
                     </div>
                     <div class="col-3">
-                        <button type="button" class="btn btn-primary">Promote to ADMIN</button>
+                        <button id="role-user-button" type="button" class="btn btn-success"></button>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">User detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <input class="form-control" type="hidden" id="roleInput">
+
+                        <label class="form-label" for="emailInput">Email:</label>
+                        <input class="form-control" type="text" id="emailInput">
+
+                        <label class="form-label" for="passwordInput">Password:</label>
+                        <input class="form-control" type="password" id="passwordInput">
+
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -138,47 +168,142 @@
     $('#detailModal').on('show.bs.modal', function (event) {
         let $row = $(event.relatedTarget)
         let $this = $(this)
-        $this.find('#idInput').val($row.data('id'))
-        $this.find('#emailInput').val($row.data('email'))
-        $this.find('#enabledInput').val($row.data('enabled'))
-        $this.find('#tokenInput').val($row.data('token'))
-        $this.find('#roleInput').val($row.data('role'))
-        $this.find('#createdInput').val($row.data('created'))
-        $this.find('#updatedInput').val($row.data('updated'))
+        $this.find('#idField').val($row.data('id'))
+        $this.find('#emailField').val($row.data('email'))
+        $this.find('#enabledField').val($row.data('enabled'))
+        $this.find('#tokenField').val($row.data('token'))
+        $this.find('#roleField').val($row.data('role'))
+        $this.find('#createdField').val($row.data('created'))
+        $this.find('#updatedField').val($row.data('updated'))
 
-        let enabledButton = $('#enabled-user-button')
-        if($('#enabledInput').val() === 'false') {
-            enabledButton.removeClass('btn btn-danger').addClass('btn btn-success');
-            enabledButton.html('Enable account');
-        } else {
-            enabledButton.removeClass('btn btn-success').addClass('btn btn-danger');
-            enabledButton.html('Disable account');
+        let $enabledField = $('#enabledField');
+        let $enabledButton = $('#enabled-user-button')
+        if($enabledField.val() === 'false') {
+            $enabledButton.removeClass('btn btn-danger').addClass('btn btn-success');
+            $enabledButton.html('Enable account');
+        } else if($enabledField.val() === 'true') {
+            $enabledButton.removeClass('btn btn-success').addClass('btn btn-danger');
+            $enabledButton.html('Disable account');
         }
+
+        let $roleField = $('#roleField');
+        let $roleButton = $('#role-user-button')
+        if($roleField.val() === 'ROLE_ADMIN') {
+            $roleButton.removeClass('btn btn-success').addClass('btn btn-danger');
+            $roleButton.html('Demote to USER');
+        } else if($roleField.val() === 'ROLE_USER') {
+            $roleButton.removeClass('btn btn-danger').addClass('btn btn-success');
+            $roleButton.html('Promote to ADMIN');
+        }
+    })
+
+    $('#detailModal').on('hidden.bs.modal', function () {
+        location.reload();
     })
 
     $(function() {
         $('#enabled-user-button').on('click', function(e) {
             let token = $("meta[name='_csrf']").attr("content");
             let header = $("meta[name='_csrf_header']").attr("content");
-            let enabledValue = ($('#enabledInput').val() === 'true');
+            let $idField = $('#idField');
+            let $enabledField = $('#enabledField');
+            let enabledValue = ($enabledField.val() === 'true');
+
             let json = JSON.stringify({
-                id: $('#idInput').val(),
+                id: $idField.val(),
                 value: !enabledValue
             })
+
             e.preventDefault();
             $.ajax({
                 method: 'PUT',
-                url: 'users',
+                url: 'users/enabled',
                 contentType: 'application/json',
                 beforeSend: function(xhr) {
                     xhr.setRequestHeader(header, token);
                 },
                 data: json,
                 success: function(response) {
-                    alert(response['response']);
+                    let $enabledButton = $('#enabled-user-button')
+                    if($enabledField.val() === 'false') {
+                        $enabledButton.removeClass('btn btn-success').addClass('btn btn-danger');
+                        $enabledButton.html('Disable account');
+                    } else if($enabledField.val() === 'true') {
+                        $enabledButton.removeClass('btn btn-danger').addClass('btn btn-success');
+                        $enabledButton.html('Enable account');
+                    }
                 },
                 error: function() {
-                    alert('Error');
+                    // alert('Error');
+                }
+            });
+            return false;
+        });
+    });
+
+    $(function() {
+        $('#role-user-button').on('click', function(e) {
+            let token = $("meta[name='_csrf']").attr("content");
+            let header = $("meta[name='_csrf_header']").attr("content");
+            let $idField = $('#idField');
+            let $roleField = $('#roleField');
+
+            let json = JSON.stringify({
+                id: $idField.val(),
+                role: $roleField.val()
+            })
+
+            e.preventDefault();
+            $.ajax({
+                method: 'PUT',
+                url: 'users/role',
+                contentType: 'application/json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader(header, token);
+                },
+                data: json,
+                success: function(response) {
+                    let $roleButton = $('#role-user-button')
+                    if($roleField.val() === 'ROLE_ADMIN') {
+                        $roleButton.removeClass('btn btn-danger').addClass('btn btn-success');
+                        $roleButton.html('Promote to ADMIN');
+                    } else if($roleField.val() === 'ROLE_USER') {
+                        $roleButton.removeClass('btn btn-success').addClass('btn btn-danger');
+                        $roleButton.html('Demote to USER');
+                    }
+                },
+                error: function() {
+                    // alert('Error');
+                }
+            });
+            return false;
+        });
+    });
+
+    $(function() {
+        $('#add-user-button').on('click', function(e) {
+            let token = $("meta[name='_csrf']").attr("content");
+            let header = $("meta[name='_csrf_header']").attr("content");
+            // let emailValue = ($('#emailInput').val() === 'true');
+            // let passwordValue = ($('#passwordInput').val() === 'true');
+            let json = JSON.stringify({
+                email: $('#emailInput').val(),
+                password: $('#passwordInput').val()
+            })
+            e.preventDefault();
+            $.ajax({
+                method: 'POST',
+                url: 'users/add',
+                contentType: 'application/json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader(header, token);
+                },
+                data: json,
+                success: function(response) {
+                    // alert(response['response']);
+                },
+                error: function() {
+                    // alert('Error');
                 }
             });
             return false;
