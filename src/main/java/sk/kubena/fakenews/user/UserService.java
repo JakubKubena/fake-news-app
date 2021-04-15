@@ -7,10 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import sk.kubena.fakenews.ajax.AJAXController;
+import sk.kubena.fakenews.util.ExtensionController;
 import sk.kubena.fakenews.error.UserAlreadyExistException;
 import sk.kubena.fakenews.role.RoleRepository;
-import sk.kubena.fakenews.ajax.TokenGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.List;
 @Service
 public class UserService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AJAXController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtensionController.class);
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;

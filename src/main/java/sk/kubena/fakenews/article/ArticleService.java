@@ -2,9 +2,7 @@ package sk.kubena.fakenews.article;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import sk.kubena.fakenews.helper.CSVHelper;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,18 +37,12 @@ public class ArticleService {
         articleRepository.save(article);
     }
 
-    public void updateArticle(int id, Article article) {
+    public void updateArticle(Article article) {
         articleRepository.save(article);
     }
 
     public void deleteArticle(int id) {
         articleRepository.deleteById(id);
-    }
-
-    public ByteArrayInputStream load() {
-//        List<Article> articles = articleRepository.findAll();
-
-        return CSVHelper.articlesToCSV(articleRepository.findAll());
     }
 
     public boolean urlExists(String url) {

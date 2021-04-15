@@ -1,7 +1,24 @@
 package sk.kubena.fakenews.rating;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class RatingController {
+
+    private final RatingService ratingService;
+
+    @Autowired
+    public RatingController(RatingService ratingService) {
+        this.ratingService = ratingService;
+    }
+
+    @GetMapping("/ratings")
+    public String ratings(Model model) {
+        model.addAttribute("ratings", ratingService.getAllRatings());
+
+        return "views/ratings";
+    }
 }

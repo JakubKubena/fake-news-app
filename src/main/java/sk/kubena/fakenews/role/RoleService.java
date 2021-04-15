@@ -21,7 +21,7 @@ public class RoleService {
         roleRepository.save(role);
     }
 
-    public void updateRole(int id, Role role) {
+    public void updateRole(Role role) {
         roleRepository.save(role);
     }
 

@@ -1,4 +1,4 @@
-package sk.kubena.fakenews.ajax;
+package sk.kubena.fakenews.user;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

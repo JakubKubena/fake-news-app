@@ -1,4 +1,4 @@
-package sk.kubena.fakenews.ajax;
+package sk.kubena.fakenews.util;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import sk.kubena.fakenews.article.Article;
@@ -18,53 +17,20 @@ import sk.kubena.fakenews.rating.RatingService;
 import sk.kubena.fakenews.user.UserDTO;
 import sk.kubena.fakenews.user.UserService;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-
 @Controller
-public class AJAXController {
+public class ExtensionController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AJAXController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExtensionController.class);
 
     private final ArticleService articleService;
     private final RatingService ratingService;
     private final UserService userService;
 
     @Autowired
-    public AJAXController(ArticleService articleService, RatingService ratingService, UserService userService) {
+    public ExtensionController(ArticleService articleService, RatingService ratingService, UserService userService) {
         this.articleService = articleService;
         this.ratingService = ratingService;
         this.userService = userService;
-    }
-
-    @GetMapping(path = "/login")
-    public String login() {
-        return "views/login";
-    }
-
-    @GetMapping("/success")
-    public void loginPageRedirect(HttpServletRequest request, HttpServletResponse response, Model model) throws IOException {
-
-        if(request.isUserInRole("ROLE_ADMIN")) {
-            response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/home"));
-        } else if(request.isUserInRole("ROLE_USER")){
-            response.sendRedirect(response.encodeRedirectURL(request.getContextPath() + "/profile"));
-        }
-    }
-
-    // home
-    @GetMapping("/home")
-    public String home(Model model) {
-        model.addAttribute("articles", articleService.getAllArticles());
-
-        return "views/home";
-    }
-
-    @GetMapping("/profile")
-    public String user() {
-
-        return "views/user";
     }
 
     // TODO: 14/04/2021 if we want to create users inside the app
@@ -216,20 +182,5 @@ public class AJAXController {
             LOGGER.warn("Token '{}' is invalid.", articleDTO.getToken());
             return ResponseEntity.badRequest().build();
         }
-    }
-
-    @GetMapping("/ratings")
-    public String ratings(Model model) {
-        model.addAttribute("ratings", ratingService.getAllRatings());
-
-        return "views/ratings";
-    }
-
-    @PostMapping(path = "/articles/{id}")
-    public String deleteArticle(Model model, @PathVariable int id) {
-        articleService.deleteArticle(id);
-        model.addAttribute("articles", articleService.getAllArticles());
-
-        return "views/home";
     }
 }
