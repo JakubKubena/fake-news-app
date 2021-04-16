@@ -61,7 +61,7 @@ public class ExtensionController {
 
     // TODO: 31/03/2021  make this method less awful, fix csrf
     // intercepts incoming user authentication requests
-    @PostMapping(path = "/authenticate")
+    @PostMapping(path = "/api/authenticate")
     public ResponseEntity<String> authenticateUser(@RequestBody UserDTO userDTO) {
         if (userService.authenticateUser(userDTO) == null) {
             LOGGER.info("Attempted login: '{}' : '{}'", userDTO.getEmail(), userDTO.getPassword());
@@ -74,7 +74,7 @@ public class ExtensionController {
 
     // TODO: 01/04/2021 connect article and user through ID instead of token
     // intercepts incoming rating requests
-    @PostMapping(path = "/request-ratings", consumes = "application/json", produces = "application/json")
+    @PostMapping(path = "/api/request-rating", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> ratingResponseEntity(@RequestBody ArticleDTO articleDTO) {
 
         // check if the request body is null
@@ -133,7 +133,7 @@ public class ExtensionController {
 
     // TODO: 01/04/2021 check if rating value is 1 of the 4
     // intercepts the incoming article requests
-    @PostMapping(path = "/api", consumes = "application/json")
+    @PostMapping(path = "/api/send-rating", consumes = "application/json")
     public ResponseEntity<?> articleResponseEntity(@RequestBody ArticleDTO articleDTO) {
         // check if the request body is null
         if(articleDTO == null) {

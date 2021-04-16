@@ -10,7 +10,7 @@
 <body>
 <nav class="navbar navbar-expand navbar-dark bg-dark" aria-label="Second navbar example" th:fragment="header">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Dashboard</a>
+        <a class="navbar-brand" href="#" th:href="@{/}">Welcome</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsExample02" aria-controls="navbarsExample02" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -33,7 +33,7 @@
 <!--                    <a class="nav-link" href="#" th:href="@{/registration}">Registration</a>-->
 <!--                </li>-->
                 <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
-                    <a class="nav-link" aria-current="page" href="#" th:href="@{/home}">Home</a>
+                    <a class="nav-link" href="#" th:href="@{/home}">Home</a>
                 </li>
                 <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
                     <a class="nav-link" href="#" th:href="@{/ratings}">Ratings</a>
@@ -60,8 +60,7 @@
                     <a class="nav-link" href="/logout" th:href="@{#}" th:attr="onclick=|(${'form'}).submit();|">
                         <span aria-hidden="true"></span>Logout
                     </a>
-                    <form th:hidden="true" id="form" method="post" action="#" th:action="@{/logout}">
-                    </form>
+                    <form th:hidden="true" id="form" method="post" action="#" th:action="@{/logout}"></form>
                 </li>
             </ul>
         </div>
