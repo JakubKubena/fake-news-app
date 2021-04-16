@@ -21,7 +21,7 @@ public class LoginController {
     }
 
     @GetMapping("/")
-    public String landingPage(Model model) {
+    public String landingPage() {
 
         return "views/landingPage";
     }

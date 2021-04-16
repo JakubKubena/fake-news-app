@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>sk.kubena</groupId>
 	<artifactId>fake-news</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>fake-news</name>
 	<description>Web application for fake news detection project</description>
 

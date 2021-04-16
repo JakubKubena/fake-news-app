@@ -45,6 +45,11 @@
                         <span aria-hidden="true"></span>Login
                     </a>
                 </li>
+                <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                    <a class="nav-link" href="/registration" th:href="@{/registration}">
+                        <span aria-hidden="true"></span>Registration
+                    </a>
+                </li>
                 <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
                     <a class="nav-link" href="/logout" th:href="@{#}" th:attr="onclick=|(${'form'}).submit();|">
                         <span aria-hidden="true"></span>Logout
