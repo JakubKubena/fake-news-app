@@ -20,6 +20,12 @@ public class LoginController {
         this.articleService = articleService;
     }
 
+    @GetMapping("/")
+    public String landingPage(Model model) {
+
+        return "views/landingPage";
+    }
+
     @GetMapping(path = "/login")
     public String login() {
         return "views/login";
