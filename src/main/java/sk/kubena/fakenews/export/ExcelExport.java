@@ -45,12 +45,12 @@ public class ExcelExport {
         createCell(row, 1, "hostname");
         createCell(row, 2, "url");
         createCell(row, 3, "title");
-//        createCell(row, 4, "content");
-        createCell(row, 4, "true");
-        createCell(row, 5, "false");
-        createCell(row, 6, "misleading");
-        createCell(row, 7, "unverified");
-        createCell(row, 8, "createdAt");
+        createCell(row, 4, "content");
+        createCell(row, 5, "true");
+        createCell(row, 6, "false");
+        createCell(row, 7, "misleading");
+        createCell(row, 8, "unverified");
+        createCell(row, 9, "createdAt");
     }
 
     private void writeDataLines() {
@@ -60,11 +60,18 @@ public class ExcelExport {
             Row row = sheet.createRow(rowCount++);
             int columnCount = 0;
 
+            // The maximum length of cell contents (text) is 32767 characters
+            String content = article.getContent().replaceAll("[\\t\\n]", "");
+            int maxLength = 32000;
+            if (content.length() > maxLength) {
+                content = content.substring(0, maxLength);
+            }
+
             createCell(row, columnCount++, article.getId());
             createCell(row, columnCount++, article.getHostname());
             createCell(row, columnCount++, article.getUrl());
             createCell(row, columnCount++, article.getTitle());
-//            createCell(row, columnCount++, article.getContent());
+            createCell(row, columnCount++, content);
             createCell(row, columnCount++, ratingService.getRatingCount(article, "true"));
             createCell(row, columnCount++, ratingService.getRatingCount(article, "false"));
             createCell(row, columnCount++, ratingService.getRatingCount(article, "misleading"));

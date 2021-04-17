@@ -1,5 +1,7 @@
 package sk.kubena.fakenews.article;
 
+import org.owasp.html.PolicyFactory;
+import org.owasp.html.Sanitizers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,11 +31,15 @@ public class ArticleService {
     }
 
     public void addArticle(ArticleDTO articleDTO) {
+        PolicyFactory policy = Sanitizers.FORMATTING;
+        String content = policy.sanitize(articleDTO.getContent());
+
         Article article = new Article();
         article.setUrl(articleDTO.getUrl());
         article.setHostname(articleDTO.getHostname());
         article.setTitle(articleDTO.getTitle());
-        article.setContent(articleDTO.getContent());
+        article.setContent(content);
+
         articleRepository.save(article);
     }
 
