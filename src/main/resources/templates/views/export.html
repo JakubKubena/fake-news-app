@@ -29,6 +29,10 @@
             width: 500px;
             /*margin: 0 auto;*/
         }
+
+        .input-group {
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -38,8 +42,14 @@
         <div class="export-window">
             <form th:action="@{/export/file}">
                 <div class="input-group">
+                    <label class="input-group-text" for="from">From</label>
+                    <input type="date" class="form-control" name="from" id="from">
+                    <label class="input-group-text" for="to">To</label>
+                    <input type="date" class="form-control" name="to" id="to">
+                </div>
+                <div class="input-group">
                     <label class="input-group-text" for="file-name">Filename</label>
-                    <input type="text" class="form-control" name="filename" id="file-name" value="dataset" maxlength="40">
+                    <input type="text" class="form-control" name="filename" id="file-name" value="dataset" maxlength="40" required>
                     <select class="form-select" name="filetype" id="file-type">
                         <option value="csv" selected>.csv</option>
                         <option value="xlsx">.xlsx</option>
@@ -50,5 +60,12 @@
         </div>
     </div>
 </div>
+<script>
+    let from = document.getElementById("from");
+    let to = document.getElementById("to");
+
+    from.max = new Date().toISOString().split("T")[0];
+    to.max = new Date().toISOString().split("T")[0];
+</script>
 </body>
 </html>

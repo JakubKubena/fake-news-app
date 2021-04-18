@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import sk.kubena.fakenews.article.ArticleService;
+import sk.kubena.fakenews.rating.RatingService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,10 +15,12 @@ import java.io.IOException;
 public class LoginController {
 
     private final ArticleService articleService;
+    private final RatingService ratingService;
 
     @Autowired
-    public LoginController(ArticleService articleService) {
+    public LoginController(ArticleService articleService, RatingService ratingService) {
         this.articleService = articleService;
+        this.ratingService = ratingService;
     }
 
     @GetMapping("/")
@@ -44,13 +47,15 @@ public class LoginController {
     @GetMapping("/home")
     public String home(Model model) {
         model.addAttribute("articles", articleService.getAllArticles());
+        model.addAttribute("hostnameCounts", articleService.getHostnameCount());
+        model.addAttribute("ratingCounts", ratingService.getRatingCount());
 
         return "views/home";
     }
 
     @GetMapping("/profile")
-    public String user() {
+    public String profile() {
 
-        return "views/user";
+        return "views/profile";
     }
 }

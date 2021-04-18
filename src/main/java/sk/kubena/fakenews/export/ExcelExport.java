@@ -72,10 +72,10 @@ public class ExcelExport {
             createCell(row, columnCount++, article.getUrl());
             createCell(row, columnCount++, article.getTitle());
             createCell(row, columnCount++, content);
-            createCell(row, columnCount++, ratingService.getRatingCount(article, "true"));
-            createCell(row, columnCount++, ratingService.getRatingCount(article, "false"));
-            createCell(row, columnCount++, ratingService.getRatingCount(article, "misleading"));
-            createCell(row, columnCount++, ratingService.getRatingCount(article, "unverified"));
+            createCell(row, columnCount++, ratingService.getArticleRatingCount(article, "true"));
+            createCell(row, columnCount++, ratingService.getArticleRatingCount(article, "false"));
+            createCell(row, columnCount++, ratingService.getArticleRatingCount(article, "misleading"));
+            createCell(row, columnCount++, ratingService.getArticleRatingCount(article, "unverified"));
             createCell(row, columnCount, String.valueOf(article.getCreatedAt()));
         }
     }

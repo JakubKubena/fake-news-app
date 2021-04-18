@@ -41,10 +41,10 @@ public class CSVExport {
                     article.getUrl(),
                     article.getTitle(),
                     article.getContent().replaceAll("[\\t]", ""),
-                    String.valueOf(ratingService.getRatingCount(article, "true")),
-                    String.valueOf(ratingService.getRatingCount(article, "false")),
-                    String.valueOf(ratingService.getRatingCount(article, "misleading")),
-                    String.valueOf(ratingService.getRatingCount(article, "unverified")),
+                    String.valueOf(ratingService.getArticleRatingCount(article, "true")),
+                    String.valueOf(ratingService.getArticleRatingCount(article, "false")),
+                    String.valueOf(ratingService.getArticleRatingCount(article, "misleading")),
+                    String.valueOf(ratingService.getArticleRatingCount(article, "unverified")),
                     String.valueOf(article.getCreatedAt())
             );
             csvPrinter.printRecord(data);

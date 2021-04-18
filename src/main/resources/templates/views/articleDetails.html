@@ -39,19 +39,19 @@
             </div>
             <div class="row">
                 <label class="rating1-label" id="rating1-label" for="rating1">True:</label>
-                <input class="rating1" type="text" id="rating1" name="rating1" th:value="${@ratingService.getRatingCount(article, 'true')}" disabled>
+                <input class="rating1" type="text" id="rating1" name="rating1" th:value="${@ratingService.getArticleRatingCount(article, 'true')}" disabled>
             </div>
             <div class="row">
                 <label class="rating2-label" id="rating2-label" for="rating2">False:</label>
-                <input class="rating2" type="text" id="rating2" name="rating2" th:value="${@ratingService.getRatingCount(article, 'false')}" disabled>
+                <input class="rating2" type="text" id="rating2" name="rating2" th:value="${@ratingService.getArticleRatingCount(article, 'false')}" disabled>
             </div>
             <div class="row">
                 <label class="rating3-label" id="rating3-label" for="rating3">Misleading:</label>
-                <input class="rating3" type="text" id="rating3" name="rating3" th:value="${@ratingService.getRatingCount(article, 'misleading')}" disabled>
+                <input class="rating3" type="text" id="rating3" name="rating3" th:value="${@ratingService.getArticleRatingCount(article, 'misleading')}" disabled>
             </div>
             <div class="row">
                 <label class="rating4-label" id="rating4-label" for="rating4">Unverified:</label>
-                <input class="rating4" type="text" id="rating4" name="rating4" th:value="${@ratingService.getRatingCount(article, 'unverified')}" disabled>
+                <input class="rating4" type="text" id="rating4" name="rating4" th:value="${@ratingService.getArticleRatingCount(article, 'unverified')}" disabled>
             </div>
             <div class="row">
                 <label class="created-label" id="created-label" for="created">Created:</label>

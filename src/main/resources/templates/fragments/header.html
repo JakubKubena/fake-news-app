@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -32,31 +32,39 @@
 <!--                <li class="nav-item" th:classappend="${module == 'registration' ? 'active' : ''}">-->
 <!--                    <a class="nav-link" href="#" th:href="@{/registration}">Registration</a>-->
 <!--                </li>-->
-                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                <li class="nav-item" sec:authorize="hasRole('USER')">
+                    <a class="nav-link" href="#" th:href="@{/profile}">Profile</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" href="#" th:href="@{/home}">Home</a>
                 </li>
-                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" href="#" th:href="@{/ratings}">Ratings</a>
                 </li>
-                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" href="#" th:href="@{/users}">Users</a>
                 </li>
-                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                     <a class="nav-link" href="#" th:href="@{/export}">Export</a>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
                     <a class="nav-link" href="/login" th:href="@{/login}">
                         <span aria-hidden="true"></span>Login
                     </a>
                 </li>
-                <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
                     <a class="nav-link" href="/registration" th:href="@{/registration}">
                         <span aria-hidden="true"></span>Registration
                     </a>
                 </li>
-                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:text="${#authentication.name}">
+                        <span aria-hidden="true"></span>
+                    </a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
                     <a class="nav-link" href="/logout" th:href="@{#}" th:attr="onclick=|(${'form'}).submit();|">
                         <span aria-hidden="true"></span>Logout
                     </a>

@@ -16,7 +16,9 @@
     <!--  Bootstrap css & js  -->
     <link type="text/css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.1.0/chart.js"></script>
     <script type="text/javascript" th:src="@{/js/bootstrap.bundle.min.js}"></script>
+
 
     <!--  Bootstrap icons  -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
@@ -24,6 +26,13 @@
     .button-delete{
         border:0;
         background:none;
+    }
+
+    .chart-container {
+        position: relative;
+        margin: auto;
+        height: 20vh;
+        width: 20vw;
     }
 </style>
 </head>
@@ -40,108 +49,244 @@
             </div>
             <div class="modal-body">
                 <div th:if="${not articles.isEmpty()}">
-                    <div>
-                        <label class="form-label" for="idInput">ID:</label>
-                        <input class="form-control" type="text" id="idInput" disabled>
+                    <div class="row row-cols-3">
+                        <div class="col">
+                            <label class="form-label" for="idInput">ID:</label>
+                            <input class="form-control" type="text" id="idInput" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="createdInput">Created:</label>
+                            <input class="form-control" type="text" id="createdInput" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="updatedInput">Updated:</label>
+                            <input class="form-control" type="text" id="updatedInput" disabled>
+                        </div>
                     </div>
-                    <div>
-                        <label class="form-label" for="urlInput">Url:</label>
-                        <input class="form-control" type="text" id="urlInput" disabled>
+                    <div class="row">
+                        <div class="col">
+                            <label class="form-label" for="urlInput">Url:</label>
+                            <input class="form-control" type="text" id="urlInput" disabled>
+
+                            <label class="form-label" for="titleInput">Title:</label>
+                            <input class="form-control" type="text" id="titleInput" disabled>
+                        </div>
                     </div>
-                    <div>
-                        <label class="form-label" for="titleInput">Title:</label>
-                        <input class="form-control" type="text" id="titleInput" disabled>
+                    <div class="row row-cols-4">
+                        <div class="col">
+                            <label class="form-label" for="rating1Input">True:</label>
+                            <input class="form-control" type="text" id="rating1Input" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="rating2Input">False:</label>
+                            <input class="form-control" type="text" id="rating2Input" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="rating3Input">Misleading:</label>
+                            <input class="form-control" type="text" id="rating3Input" disabled>
+                        </div>
+                        <div class="col">
+                            <label class="form-label" for="rating4Input">Unverified:</label>
+                            <input class="form-control" type="text" id="rating4Input" disabled>
+                        </div>
                     </div>
-                    <div>
-                        <label class="form-label" for="contentInput">Content:</label>
-                        <textarea class="form-control" id="contentInput" rows="10" disabled></textarea>
-                    </div>
-                    <div>
-                        <label class="form-label" for="rating1Input">True:</label>
-                        <input class="form-control" type="text" id="rating1Input" disabled>
-                    </div>
-                    <div>
-                        <label class="form-label" for="rating2Input">False:</label>
-                        <input class="form-control" type="text" id="rating2Input" disabled>
-                    </div>
-                    <div>
-                        <label class="form-label" for="rating3Input">Misleading:</label>
-                        <input class="form-control" type="text" id="rating3Input" disabled>
-                    </div>
-                    <div>
-                        <label class="form-label" for="rating4Input">Unverified:</label>
-                        <input class="form-control" type="text" id="rating4Input" disabled>
-                    </div>
-                    <div>
-                        <label class="form-label" for="createdInput">Created:</label>
-                        <input class="form-control" type="text" id="createdInput" disabled>
-                    </div>
-                    <div>
-                        <label class="form-label" for="updatedInput">Updated:</label>
-                        <input class="form-control" type="text" id="updatedInput" disabled>
+                    <div class="row">
+                        <div class="col">
+                            <label class="form-label" for="contentInput">Content:</label>
+                            <textarea class="form-control" id="contentInput" rows="10" disabled></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+<!--                <button type="button" class="btn btn-primary">Save changes</button>-->
             </div>
         </div>
     </div>
 </div>
 
 <div class="container-fluid">
-    <div th:if="${articles != null && !articles.isEmpty()}">
-<!--        <a th:href="@{/export}">Export to CSV</a>-->
-        <table class="table table-dark table-hover" id="myTable">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Hostname</th>
-                <th>Title</th>
-                <th>True</th>
-                <th>False</th>
-                <th>Misleading</th>
-                <th>Unverified</th>
-                <th>Created</th>
-<!--                <th>Action</th>-->
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="article : ${articles}" th:data-id="${article.getId()}" data-bs-toggle="modal" data-bs-target="#detailModal"
-                th:attr="data-id=''+${article.getId()}+'',
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <div class="chart-container">
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+            <div class="col">
+                <div class="chart-container">
+                    <canvas id="myChart2"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div class="container-fluid">
+        <div th:if="${articles != null && !articles.isEmpty()}">
+            <!--        <a th:href="@{/export}">Export to CSV</a>-->
+            <table class="table table-dark table-hover" id="myTable">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Hostname</th>
+                    <th>Title</th>
+                    <th>True</th>
+                    <th>False</th>
+                    <th>Misleading</th>
+                    <th>Unverified</th>
+                    <th>Created</th>
+                    <!--                <th>Action</th>-->
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="article : ${articles}" th:data-id="${article.getId()}" data-bs-toggle="modal" data-bs-target="#detailModal"
+                    th:attr="data-id=''+${article.getId()}+'',
                     data-url=''+${article.getUrl()}+'',
                     data-hostname=''+${article.getHostname()}+'',
                     data-title=''+${article.getTitle()}+'',
                     data-content=''+${article.getContent()}+'',
-                    data-rating1=''+${@ratingService.getRatingCount(article, 'true')}+'',
-                    data-rating2=''+${@ratingService.getRatingCount(article, 'false')}+'',
-                    data-rating3=''+${@ratingService.getRatingCount(article, 'misleading')}+'',
-                    data-rating4=''+${@ratingService.getRatingCount(article, 'unverified')}+'',
+                    data-rating1=''+${@ratingService.getArticleRatingCount(article, 'true')}+'',
+                    data-rating2=''+${@ratingService.getArticleRatingCount(article, 'false')}+'',
+                    data-rating3=''+${@ratingService.getArticleRatingCount(article, 'misleading')}+'',
+                    data-rating4=''+${@ratingService.getArticleRatingCount(article, 'unverified')}+'',
                     data-created=''+${article.getCreatedAt()}+'',
                     data-updated=''+${article.getUpdatedAt()}+''">
-                <td th:text="${article.getId()}"></td>
-                <td th:text="${article.getHostname()}"></td>
-                <td th:text="${article.getTitle()}"></td>
-                <td th:text="${@ratingService.getRatingCount(article, 'true')}"></td>
-                <td th:text="${@ratingService.getRatingCount(article, 'false')}"></td>
-                <td th:text="${@ratingService.getRatingCount(article, 'misleading')}"></td>
-                <td th:text="${@ratingService.getRatingCount(article, 'unverified')}"></td>
-<!--                <td th:text="${#strings.substring(article.getContent(),0,100)} + '...'"></td>-->
-                <td th:text="${#dates.format(article.getCreatedAt(), 'dd-MM-yyyy HH:mm:ss')}"></td>
-<!--                <td>-->
-<!--&lt;!&ndash;                    <a th:href="@{'/article/' + ${article.getId()}}"><i class="bi bi-trash"></i></a>&ndash;&gt;-->
-<!--&lt;!&ndash;                    <form th:action="@{'/article/' + ${article.getId()}}" th:method="post">&ndash;&gt;-->
-<!--&lt;!&ndash;                        <button class="button-delete" type="submit" id="submitButton"><i class="bi bi-trash"></i></button>&ndash;&gt;-->
-<!--&lt;!&ndash;                    </form>&ndash;&gt;-->
-<!--                </td>-->
-            </tr>
-            </tbody>
-        </table>
+                    <td th:text="${article.getId()}"></td>
+                    <td th:text="${article.getHostname()}"></td>
+                    <td th:text="${article.getTitle()}"></td>
+                    <td th:text="${@ratingService.getArticleRatingCount(article, 'true')}"></td>
+                    <td th:text="${@ratingService.getArticleRatingCount(article, 'false')}"></td>
+                    <td th:text="${@ratingService.getArticleRatingCount(article, 'misleading')}"></td>
+                    <td th:text="${@ratingService.getArticleRatingCount(article, 'unverified')}"></td>
+                    <!--                <td th:text="${#strings.substring(article.getContent(),0,100)} + '...'"></td>-->
+                    <td th:text="${#dates.format(article.getCreatedAt(), 'dd-MM-yyyy HH:mm:ss')}"></td>
+                    <!--                <td>-->
+                    <!--&lt;!&ndash;                    <a th:href="@{'/article/' + ${article.getId()}}"><i class="bi bi-trash"></i></a>&ndash;&gt;-->
+                    <!--&lt;!&ndash;                    <form th:action="@{'/article/' + ${article.getId()}}" th:method="post">&ndash;&gt;-->
+                    <!--&lt;!&ndash;                        <button class="button-delete" type="submit" id="submitButton"><i class="bi bi-trash"></i></button>&ndash;&gt;-->
+                    <!--&lt;!&ndash;                    </form>&ndash;&gt;-->
+                    <!--                </td>-->
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
+<script th:inline="javascript">
+    /*<![CDATA[*/
+
+    // $(document).ready(function() {
+        let hostnameKeys = [[${hostnameCounts.keySet()}]];
+        let hostnameValues = [[${hostnameCounts.values()}]];
+
+        let ratingKeys = [[${ratingCounts.keySet()}]];
+        let ratingValues = [[${ratingCounts.values()}]];
+    // })
+
+    /*]]>*/
+</script>
+
 <script>
+    // $(document).ready(function() {
+        let ctx = document.getElementById('myChart');
+        let myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: hostnameKeys,
+                datasets: [{
+                    label: 'Hostnames',
+                    data: hostnameValues,
+                    backgroundColor: [
+                        "rgb(88,181,225)",
+                        "rgb(54,109,165)",
+                        "rgb(170,164,225)",
+                        "rgb(121,74,152)",
+                        "rgb(223,114,239)",
+                        "rgb(158,33,169)",
+                        "rgb(27,225,159)",
+                        "rgb(5,110,18)",
+                        "rgb(159,211,170)",
+                        "rgb(51,77,55)",
+                        "rgb(119,190,32)",
+                        "rgb(115,138,105)",
+                        "rgb(32,245,61)",
+                        "rgb(115,53,14)",
+                        "rgb(226,153,136)",
+                        "rgb(187,7,73)",
+                        "rgb(248,209,71)",
+                        "rgb(230,82,1)",
+                        "rgb(250,113,142)",
+                        "rgb(208,125,9)"
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Hostnames'
+                    },
+                    legend: {
+                        display: false
+                    }
+                },
+                responsive : true,
+                maintainAspectRatio: false
+            }
+        });
+
+    let ctx2 = document.getElementById('myChart2');
+    let myChart2 = new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ratingKeys,
+            datasets: [{
+                label: 'Ratings',
+                data: ratingValues,
+                backgroundColor: [
+                    "rgb(88,181,225)",
+                    "rgb(54,109,165)",
+                    "rgb(170,164,225)",
+                    "rgb(121,74,152)",
+                    "rgb(223,114,239)",
+                    "rgb(158,33,169)",
+                    "rgb(27,225,159)",
+                    "rgb(5,110,18)",
+                    "rgb(159,211,170)",
+                    "rgb(51,77,55)",
+                    "rgb(119,190,32)",
+                    "rgb(115,138,105)",
+                    "rgb(32,245,61)",
+                    "rgb(115,53,14)",
+                    "rgb(226,153,136)",
+                    "rgb(187,7,73)",
+                    "rgb(248,209,71)",
+                    "rgb(230,82,1)",
+                    "rgb(250,113,142)",
+                    "rgb(208,125,9)"
+                ],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Ratings'
+                },
+                legend: {
+                    display: false
+                }
+            },
+            responsive : true,
+            maintainAspectRatio: false
+        }
+    });
+    // })
+
     $(document).ready( function () {
         $('#myTable').DataTable();
     } );

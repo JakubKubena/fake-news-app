@@ -35,9 +35,12 @@ public class ExportController {
 //        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
 //        String currentDateTime = dateFormatter.format(new Date());
         // get request params and all articles
+        String dateFrom = request.getParameter("from");
+        String dateTo = request.getParameter("to");
         String fileName = request.getParameter("filename");
         String fileType = request.getParameter("filetype");
-        List<Article> listArticles = articleService.getAllArticles();
+//        List<Article> listArticles = articleService.getAllArticles();
+        List<Article> listArticles = articleService.getAllBetween(dateFrom, dateTo);
 
         // set response header
         String headerKey = "Content-Disposition";

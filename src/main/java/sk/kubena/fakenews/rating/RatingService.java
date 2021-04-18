@@ -6,6 +6,7 @@ import sk.kubena.fakenews.article.Article;
 import sk.kubena.fakenews.user.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -42,8 +43,19 @@ public class RatingService {
         ratingRepository.deleteById(id);
     }
 
-    public int getRatingCount(Article article, String value) {
+    public int getArticleRatingCount(Article article, String value) {
         return ratingRepository.countByArticleAndValue(article, value);
+    }
+
+    public HashMap<String, Integer> getRatingCount() {
+        HashMap<String, Integer> hashMap = new HashMap<>();
+        String[] values = {"True", "False", "Misleading", "Unverified", };
+
+        for (String value : values) {
+            hashMap.put(value, ratingRepository.countByValue(value));
+        }
+
+        return hashMap;
     }
 
     public boolean ratingExists(Article article, User user) {

@@ -46,7 +46,7 @@ public class ExtensionController {
 //        }
 //    }
 
-    // TODO: 31/03/2021 handle extension uninstallation
+    // TODO: 31/03/2021 handle extension uninstallation if needed
 //    @GetMapping(path = "/uninstalled/{tokenString}")
 //    public ResponseEntity<?> uninstalledResponseEntity(@PathVariable String tokenString) {
 //        if (tokenService.isTokenValid(tokenString)) {
@@ -59,7 +59,6 @@ public class ExtensionController {
 //        return ResponseEntity.ok().build();
 //    }
 
-    // TODO: 31/03/2021  make this method less awful, fix csrf
     // intercepts incoming user authentication requests
     @PostMapping(path = "/api/authenticate")
     public ResponseEntity<String> authenticateUser(@RequestBody UserDTO userDTO) {
@@ -106,19 +105,19 @@ public class ExtensionController {
             // if the article does exist, then check if the rating of that article by that user does also exist
             } else if(ratingService.ratingExists(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken()))) {
                 // sending the article ratings along with the article rating by that user
-                responseJson.put("rating1", ratingService.getRatingCount(existingArticle, "true"));
-                responseJson.put("rating2", ratingService.getRatingCount(existingArticle, "false"));
-                responseJson.put("rating3", ratingService.getRatingCount(existingArticle, "misleading"));
-                responseJson.put("rating4", ratingService.getRatingCount(existingArticle, "unverified"));
+                responseJson.put("rating1", ratingService.getArticleRatingCount(existingArticle, "true"));
+                responseJson.put("rating2", ratingService.getArticleRatingCount(existingArticle, "false"));
+                responseJson.put("rating3", ratingService.getArticleRatingCount(existingArticle, "misleading"));
+                responseJson.put("rating4", ratingService.getArticleRatingCount(existingArticle, "unverified"));
                 responseJson.put("userRating", ratingService.getRatingByArticleAndUser(articleService.getArticleByUrl(articleDTO.getUrl()), userService.getUserByToken(articleDTO.getToken())).getValue());
                 LOGGER.warn("Rating of {} by {} found - sending ratings: {}", articleDTO.toString(), userService.getUserByToken(articleDTO.getToken()).toString(), responseJson);
 
             // if the article rating by that user does not exist, add new rating
             } else {
-                responseJson.put("rating1", ratingService.getRatingCount(existingArticle, "true"));
-                responseJson.put("rating2", ratingService.getRatingCount(existingArticle, "false"));
-                responseJson.put("rating3", ratingService.getRatingCount(existingArticle, "misleading"));
-                responseJson.put("rating4", ratingService.getRatingCount(existingArticle, "unverified"));
+                responseJson.put("rating1", ratingService.getArticleRatingCount(existingArticle, "true"));
+                responseJson.put("rating2", ratingService.getArticleRatingCount(existingArticle, "false"));
+                responseJson.put("rating3", ratingService.getArticleRatingCount(existingArticle, "misleading"));
+                responseJson.put("rating4", ratingService.getArticleRatingCount(existingArticle, "unverified"));
                 responseJson.put("userRating", "null");
                 LOGGER.info("Record of article found - sending ratings: {}", responseJson);
             }
